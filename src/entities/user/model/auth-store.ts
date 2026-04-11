@@ -1,25 +1,44 @@
 import type { User } from './types'
 
-const STORAGE_KEY = 'bayyina_auth'
+const TOKEN_KEY = 'bayyina_token'
+const USER_KEY  = 'bayyina_user'
 
-interface StoredAuth {
-  user: User
-  token: string
+// ─── Token ────────────────────────────────────────────────────────────────────
+
+export function getStoredToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY)
 }
 
-export function getStoredAuth(): StoredAuth | null {
+export function setStoredToken(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token)
+}
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+
+export function getStoredUser(): User | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as StoredAuth) : null
+    const raw = localStorage.getItem(USER_KEY)
+    return raw ? (JSON.parse(raw) as User) : null
   } catch {
     return null
   }
 }
 
-export function setStoredAuth(user: User, token: string): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ user, token }))
+export function setStoredUser(user: User): void {
+  localStorage.setItem(USER_KEY, JSON.stringify(user))
 }
 
+// ─── Clear ────────────────────────────────────────────────────────────────────
+
 export function clearStoredAuth(): void {
-  localStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(USER_KEY)
+}
+
+// ─── Legacy compat (used in useLogin previously) ─────────────────────────────
+
+/** @deprecated Use setStoredToken + setStoredUser separately */
+export function setStoredAuth(user: User, token: string): void {
+  setStoredToken(token)
+  setStoredUser(user)
 }

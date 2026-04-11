@@ -1,45 +1,46 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Users, CalendarCheck, LogOut, GraduationCap, Menu, X } from 'lucide-react'
 import { useState } from 'react'
-import { ROUTES } from '@/shared/config/routes'
-import { useAuth } from '@/app/providers/AuthProvider'
-import { cn } from '@/shared/lib/cn'
+import { ROUTES }   from '@/shared/config/routes'
+import { useAuth }  from '@/app/providers/AuthProvider'
+import { cn }       from '@/lib/utils'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
+import { Button }    from '@/components/ui/button'
 
 interface NavItem {
-  label:  string
-  icon:   React.ReactNode
-  path:   string
+  label: string
+  icon:  React.ReactNode
+  path:  string
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Guruhlar',  icon: <Users size={18} />,         path: ROUTES.GROUPS    },
-  { label: 'Davomat',   icon: <CalendarCheck size={18} />, path: ROUTES.ATTENDANCE },
+  { label: 'Guruhlar', icon: <Users size={17} />,         path: ROUTES.GROUPS    },
+  { label: 'Davomat',  icon: <CalendarCheck size={17} />, path: ROUTES.ATTENDANCE },
 ]
 
-interface SidebarProps {
-  className?: string
+function getUserInitials(user: { firstName?: string; lastName?: string; name?: string } | null): string {
+  if (!user) return 'U'
+  if (user.firstName && user.lastName) {
+    return (user.firstName[0] + user.lastName[0]).toUpperCase()
+  }
+  return (user.name ?? 'U').charAt(0).toUpperCase()
 }
 
-export function Sidebar({ className }: SidebarProps) {
-  const { user, logout }  = useAuth()
-  const navigate           = useNavigate()
-  const [mobileOpen, setMobileOpen] = useState(false)
+function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
+  const { user, logout } = useAuth()
+  const navigate          = useNavigate()
 
   function handleLogout() {
     logout()
     navigate(ROUTES.LOGIN, { replace: true })
   }
 
-  const content = (
-    <aside
-      className={cn(
-        'flex flex-col w-64 h-full bg-white border-r border-brown-100 shadow-soft',
-        className,
-      )}
-    >
-      {/* Logo / brand */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-brown-100">
-        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-brown-800">
+  return (
+    <aside className="flex flex-col w-64 h-full bg-white border-r border-brown-100 shadow-soft">
+      {/* Brand */}
+      <div className="flex items-center gap-3 px-5 py-5">
+        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-brown-800 shrink-0">
           <GraduationCap size={18} className="text-white" />
         </div>
         <div>
@@ -48,14 +49,19 @@ export function Sidebar({ className }: SidebarProps) {
         </div>
       </div>
 
+      <Separator />
+
       {/* Nav */}
       <nav className="flex-1 px-3 py-4">
-        <ul className="flex flex-col gap-1">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-brown-300 px-3 mb-2">
+          Menyu
+        </p>
+        <ul className="flex flex-col gap-0.5">
           {NAV_ITEMS.map((item) => (
             <li key={item.path}>
               <NavLink
                 to={item.path}
-                onClick={() => setMobileOpen(false)}
+                onClick={onNavClick}
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
@@ -73,51 +79,68 @@ export function Sidebar({ className }: SidebarProps) {
         </ul>
       </nav>
 
+      <Separator />
+
       {/* User footer */}
-      <div className="px-3 py-4 border-t border-brown-100">
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brown-100 text-brown-700 text-xs font-semibold shrink-0">
-            {user?.name.charAt(0) ?? 'U'}
-          </div>
+      <div className="px-3 py-4 space-y-1">
+        {/* User row */}
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl">
+          <Avatar size="sm">
+            <AvatarFallback initials={getUserInitials(user)} />
+          </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-brown-900 truncate">{user?.name}</p>
-            <p className="text-xs text-brown-400 truncate">{user?.email}</p>
+            <p className="text-sm font-medium text-brown-900 truncate leading-tight">
+              {user ? `${user.firstName} ${user.lastName}` : '—'}
+            </p>
+            {user?.role && (
+              <p className="text-xs text-brown-400 truncate capitalize">{user.role}</p>
+            )}
           </div>
         </div>
-        <button
+
+        {/* Logout */}
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleLogout}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm text-brown-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+          className="w-full justify-start gap-2 text-brown-500 hover:bg-red-50 hover:text-red-600"
         >
-          <LogOut size={15} />
+          <LogOut size={14} />
           Chiqish
-        </button>
+        </Button>
       </div>
     </aside>
   )
+}
+
+export function Sidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
     <>
-      {/* Desktop sidebar */}
-      <div className="hidden lg:flex h-full">{content}</div>
+      {/* Desktop */}
+      <div className="hidden lg:flex h-full">
+        <SidebarContent />
+      </div>
 
-      {/* Mobile toggle button */}
+      {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen((o) => !o)}
-        className="lg:hidden fixed top-4 left-4 z-50 flex items-center justify-center w-10 h-10 bg-white rounded-xl shadow-card border border-brown-100 text-brown-700"
+        className="lg:hidden fixed top-4 left-4 z-50 flex items-center justify-center w-10 h-10 bg-white rounded-xl shadow-card border border-brown-100 text-brown-700 hover:bg-brown-50 transition-colors"
         aria-label="Menu"
       >
-        {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+        {mobileOpen ? <X size={17} /> : <Menu size={17} />}
       </button>
 
-      {/* Mobile drawer overlay */}
+      {/* Mobile drawer */}
       {mobileOpen && (
         <>
           <div
             className="lg:hidden fixed inset-0 bg-brown-900/20 z-40 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="lg:hidden fixed left-0 top-0 h-full z-50">
-            {content}
+          <div className="lg:hidden fixed left-0 top-0 h-full z-50 animate-fadeIn">
+            <SidebarContent onNavClick={() => setMobileOpen(false)} />
           </div>
         </>
       )}

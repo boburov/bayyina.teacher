@@ -5,6 +5,7 @@ export const MOCK_TEACHER = {
   id:     '1',
   name:   'Aziz Karimov',
   email:  'aziz@bayyina.uz',
+  phone:  '+998901234567',
   avatar: null as string | null,
 }
 

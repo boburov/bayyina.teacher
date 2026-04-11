@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
-import { Navigate } from 'react-router-dom'
-import { Sidebar } from '@/widgets/sidebar/ui/Sidebar'
-import { useAuth } from '@/app/providers/AuthProvider'
-import { ROUTES } from '@/shared/config/routes'
+import { Navigate }       from 'react-router-dom'
+import { Sidebar }        from '@/widgets/sidebar/ui/Sidebar'
+import { useAuth }        from '@/app/providers/AuthProvider'
+import { ROUTES }         from '@/shared/config/routes'
 
 interface DashboardLayoutProps {
   children: ReactNode

@@ -1,20 +1,73 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { Phone, User, CalendarCheck, Users, Clock } from 'lucide-react'
+import { useQuery }               from '@tanstack/react-query'
+import { Phone, CalendarCheck, Users, Clock, Loader2 } from 'lucide-react'
 import { fetchGroupById } from '@/entities/group/model/api'
 import { ROUTES }         from '@/shared/config/routes'
 import { DashboardLayout }  from '@/widgets/dashboard-layout/ui/DashboardLayout'
 import { Header }           from '@/widgets/header/ui/Header'
-import { Card }             from '@/shared/ui/Card'
-import { Badge }            from '@/shared/ui/Badge'
-import { Button }           from '@/shared/ui/Button'
-import { TableRowSkeleton } from '@/shared/ui/Skeleton'
-import { EmptyState }       from '@/shared/ui/EmptyState'
-import { PageSpinner }      from '@/shared/ui/Spinner'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Badge }            from '@/components/ui/badge'
+import { Button }           from '@/components/ui/button'
+import { Skeleton }         from '@/components/ui/skeleton'
+import { Separator }        from '@/components/ui/separator'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+
+// ─── Info stat card ───────────────────────────────────────────────────────────
+
+function StatCard({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
+  return (
+    <Card>
+      <CardContent className="px-5 py-4">
+        <div className="flex items-center gap-2 text-brown-400 mb-1.5">
+          {icon}
+          <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
+        </div>
+        <p className="text-sm font-semibold text-brown-900">{value}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ─── Skeleton rows ────────────────────────────────────────────────────────────
+
+function TableSkeletonRows() {
+  return (
+    <>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <TableRow key={i} className="hover:bg-transparent">
+          <TableCell><Skeleton className="w-5 h-4" /></TableCell>
+          <TableCell>
+            <div className="flex items-center gap-2.5">
+              <Skeleton className="w-7 h-7 rounded-full" />
+              <Skeleton className="w-32 h-4" />
+            </div>
+          </TableCell>
+          <TableCell className="hidden sm:table-cell"><Skeleton className="w-36 h-4" /></TableCell>
+          <TableCell className="hidden sm:table-cell"><Skeleton className="w-14 h-6 rounded-full" /></TableCell>
+        </TableRow>
+      ))}
+    </>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function GroupDetailsPage() {
-  const { id }    = useParams<{ id: string }>()
-  const navigate  = useNavigate()
+  const { id }   = useParams<{ id: string }>()
+  const navigate = useNavigate()
 
   const { data: group, isLoading, isError } = useQuery({
     queryKey: ['group', id],
@@ -22,10 +75,16 @@ export function GroupDetailsPage() {
     enabled:  !!id,
   })
 
+  function goToAttendance() {
+    navigate(`${ROUTES.ATTENDANCE}?groupId=${group!.id}`)
+  }
+
   if (isLoading) {
     return (
       <DashboardLayout>
-        <PageSpinner />
+        <div className="flex items-center justify-center py-24">
+          <Loader2 size={28} className="animate-spin text-brown-400" />
+        </div>
       </DashboardLayout>
     )
   }
@@ -34,17 +93,15 @@ export function GroupDetailsPage() {
     return (
       <DashboardLayout>
         <Header title="Guruh topilmadi" backPath={ROUTES.GROUPS} />
-        <EmptyState
-          icon={<Users size={48} />}
-          title="Bunday guruh mavjud emas"
-          description="URL to'g'ri ekanligini tekshiring."
-        />
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-brown-50 text-brown-300 mb-4">
+            <Users size={28} />
+          </div>
+          <p className="text-base font-medium text-brown-700">Bunday guruh mavjud emas</p>
+          <p className="text-sm text-brown-400 mt-1">URL to'g'ri ekanligini tekshiring.</p>
+        </div>
       </DashboardLayout>
     )
-  }
-
-  function goToAttendance() {
-    navigate(`${ROUTES.ATTENDANCE}?groupId=${group!.id}`)
   }
 
   return (
@@ -54,125 +111,97 @@ export function GroupDetailsPage() {
         subtitle={`${group.studentCount} o'quvchi`}
         backPath={ROUTES.GROUPS}
         action={
-          <Button onClick={goToAttendance} size="md" className="gap-2">
+          <Button onClick={goToAttendance} size="default" className="gap-2">
             <CalendarCheck size={15} />
             Davomatga o'tish
           </Button>
         }
       />
 
-      {/* Info stats */}
+      {/* Stats row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <InfoCard
-          label="O'quvchilar soni"
+        <StatCard
+          label="O'quvchilar"
           value={`${group.studentCount} nafar`}
-          icon={<Users size={16} />}
+          icon={<Users size={15} />}
         />
-        <InfoCard
+        <StatCard
           label="Dars kunlari"
           value={group.schedule.days.join(', ')}
-          icon={<Clock size={16} />}
+          icon={<Clock size={15} />}
         />
-        <InfoCard
+        <StatCard
           label="Dars vaqti"
           value={group.schedule.time}
-          icon={<Clock size={16} />}
+          icon={<Clock size={15} />}
         />
       </div>
 
-      {/* Students table */}
-      <Card padding="none">
-        <div className="px-6 py-4 border-b border-brown-50">
-          <h2 className="text-sm font-semibold text-brown-900">
-            O'quvchilar ro'yxati
-          </h2>
-        </div>
+      {/* Students table card */}
+      <Card className="overflow-hidden">
+        <CardHeader className="px-6 py-4 pb-0">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">O'quvchilar ro'yxati</CardTitle>
+            <Badge variant="outline">{group.studentCount} nafar</Badge>
+          </div>
+        </CardHeader>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-brown-50 bg-brown-50/50">
-                <th className="text-left px-6 py-3 text-xs font-medium text-brown-400 uppercase tracking-wider w-10">
-                  #
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-brown-400 uppercase tracking-wider">
-                  Ism Familiya
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-brown-400 uppercase tracking-wider hidden sm:table-cell">
-                  Telefon
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-brown-400 uppercase tracking-wider hidden sm:table-cell">
-                  Holat
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading
-                ? Array.from({ length: 5 }).map((_, i) => (
-                    <TableRowSkeleton key={i} cols={4} />
-                  ))
-                : group.students.map((student, idx) => (
-                    <tr
-                      key={student.id}
-                      className="border-b border-brown-50 last:border-0 hover:bg-brown-50/50 transition-colors"
-                    >
-                      <td className="px-6 py-3.5 text-brown-400 text-sm">{idx + 1}</td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex items-center justify-center w-7 h-7 rounded-full bg-brown-100 text-brown-600 text-xs font-semibold shrink-0">
-                            {student.name.charAt(0)}
-                          </div>
-                          <span className="font-medium text-brown-900">{student.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 hidden sm:table-cell">
-                        {student.phone ? (
-                          <span className="flex items-center gap-1.5 text-brown-600 font-mono text-xs">
-                            <Phone size={12} />
-                            {student.phone}
-                          </span>
-                        ) : (
-                          <span className="text-brown-300 text-xs">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3.5 hidden sm:table-cell">
-                        <Badge variant="success">Faol</Badge>
-                      </td>
-                    </tr>
-                  ))}
-            </tbody>
-          </table>
-        </div>
+        <Separator className="mt-4" />
 
-        {/* Floating CTA at the bottom */}
-        <div className="px-6 py-4 border-t border-brown-50 flex justify-end">
-          <Button variant="secondary" size="sm" onClick={goToAttendance} className="gap-1.5">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-brown-50/60 hover:bg-brown-50/60">
+              <TableHead className="w-12 pl-6">#</TableHead>
+              <TableHead>Ism Familiya</TableHead>
+              <TableHead className="hidden sm:table-cell">Telefon</TableHead>
+              <TableHead className="hidden sm:table-cell">Holat</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableSkeletonRows />
+            ) : (
+              group.students.map((student, idx) => (
+                <TableRow key={student.id}>
+                  <TableCell className="pl-6 text-brown-400 text-xs font-mono">
+                    {idx + 1}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2.5">
+                      <Avatar size="sm">
+                        <AvatarFallback initials={student.name.charAt(0)} />
+                      </Avatar>
+                      <span className="font-medium text-brown-900">{student.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {student.phone ? (
+                      <span className="flex items-center gap-1.5 text-brown-600 font-mono text-xs">
+                        <Phone size={12} />
+                        {student.phone}
+                      </span>
+                    ) : (
+                      <span className="text-brown-300 text-xs">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <Badge variant="success">Faol</Badge>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+
+        {/* Footer CTA */}
+        <Separator />
+        <div className="px-6 py-4 flex justify-end">
+          <Button variant="outline" size="sm" onClick={goToAttendance} className="gap-1.5">
             <CalendarCheck size={14} />
             Davomatni boshqarish
           </Button>
         </div>
       </Card>
-
-      {/* Info helper */}
-      <div className="mt-4 flex items-start gap-2.5 px-1">
-        <User size={14} className="text-brown-300 mt-0.5 shrink-0" />
-        <p className="text-xs text-brown-400 leading-relaxed">
-          Davomat olish uchun yuqoridagi "Davomatga o'tish" tugmasini bosing yoki
-          chap menudagi <strong className="text-brown-600">Davomat</strong> bo'limiga o'ting.
-        </p>
-      </div>
     </DashboardLayout>
-  )
-}
-
-function InfoCard({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
-  return (
-    <div className="bg-white rounded-2xl border border-brown-100 shadow-soft px-5 py-4">
-      <div className="flex items-center gap-2 text-brown-400 mb-1.5">
-        {icon}
-        <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
-      </div>
-      <p className="text-sm font-semibold text-brown-900">{value}</p>
-    </div>
   )
 }
