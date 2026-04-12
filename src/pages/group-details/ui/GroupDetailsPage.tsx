@@ -1,22 +1,22 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery }               from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Phone, CalendarCheck, Users, Clock, Loader2 } from 'lucide-react'
-import { fetchGroupById }            from '@/entities/group/model/api'
-import { fetchEnrollmentsByGroup }   from '@/entities/enrollment/model/api'
-import { useAuth }                   from '@/app/providers/AuthProvider'
-import { ROUTES }                    from '@/shared/config/routes'
-import { DashboardLayout }           from '@/widgets/dashboard-layout/ui/DashboardLayout'
-import { Header }                    from '@/widgets/header/ui/Header'
+import { fetchGroupById } from '@/entities/group/model/api'
+import { fetchEnrollmentsByGroup } from '@/entities/enrollment/model/api'
+import { useAuth } from '@/app/providers/AuthProvider'
+import { ROUTES } from '@/shared/config/routes'
+import { DashboardLayout } from '@/widgets/dashboard-layout/ui/DashboardLayout'
+import { Header } from '@/widgets/header/ui/Header'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Badge }            from '@/components/ui/badge'
-import { Button }           from '@/components/ui/button'
-import { Skeleton }         from '@/components/ui/skeleton'
-import { Separator }        from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   Table,
@@ -68,24 +68,24 @@ function TableSkeletonRows() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function GroupDetailsPage() {
-  const { id }       = useParams<{ id: string }>()
-  const navigate     = useNavigate()
-  const { token }    = useAuth()
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { token } = useAuth()
 
   const { data: group, isLoading: groupLoading, isError: groupError } = useQuery({
-    queryKey: ['group', id],
-    queryFn:  () => fetchGroupById(id!),
-    enabled:  !!id,
+    queryKey: ['groups', id],
+    queryFn: () => fetchGroupById(id!, token!),
+    enabled: !!id && !!token,
   })
 
   const {
-    data:      enrollments = [],
+    data: enrollments = [],
     isLoading: enrollmentsLoading,
-    isError:   enrollmentsError,
+    isError: enrollmentsError,
   } = useQuery({
     queryKey: ['enrollments', id],
-    queryFn:  () => fetchEnrollmentsByGroup(id!, token!),
-    enabled:  !!id && !!token,
+    queryFn: () => fetchEnrollmentsByGroup(id!, token!),
+    enabled: !!id && !!token,
   })
 
   const isLoading = groupLoading || enrollmentsLoading
@@ -193,7 +193,7 @@ export function GroupDetailsPage() {
               </TableRow>
             ) : (
               enrollments.map((enrollment, idx) => {
-                const s    = enrollment.student
+                const s = enrollment.student
                 const name = `${s.firstName} ${s.lastName}`
                 const phone = String(s.phone)
 

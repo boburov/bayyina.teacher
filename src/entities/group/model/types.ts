@@ -32,6 +32,12 @@ export interface Group {
   students:     Student[]
 }
 
+export interface GroupDetailResponse {
+  group:   ApiGroup
+  code:    string
+  message: string
+}
+
 export interface GroupsResponse {
   groups:     ApiGroup[]
   total:      number
