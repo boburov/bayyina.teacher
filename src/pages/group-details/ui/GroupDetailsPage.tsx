@@ -1,10 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery }               from '@tanstack/react-query'
 import { Phone, CalendarCheck, Users, Clock, Loader2 } from 'lucide-react'
-import { fetchGroupById } from '@/entities/group/model/api'
-import { ROUTES }         from '@/shared/config/routes'
-import { DashboardLayout }  from '@/widgets/dashboard-layout/ui/DashboardLayout'
-import { Header }           from '@/widgets/header/ui/Header'
+import { fetchGroupById }            from '@/entities/group/model/api'
+import { fetchEnrollmentsByGroup }   from '@/entities/enrollment/model/api'
+import { useAuth }                   from '@/app/providers/AuthProvider'
+import { ROUTES }                    from '@/shared/config/routes'
+import { DashboardLayout }           from '@/widgets/dashboard-layout/ui/DashboardLayout'
+import { Header }                    from '@/widgets/header/ui/Header'
 import {
   Card,
   CardContent,
@@ -66,20 +68,33 @@ function TableSkeletonRows() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function GroupDetailsPage() {
-  const { id }   = useParams<{ id: string }>()
-  const navigate = useNavigate()
+  const { id }       = useParams<{ id: string }>()
+  const navigate     = useNavigate()
+  const { token }    = useAuth()
 
-  const { data: group, isLoading, isError } = useQuery({
+  const { data: group, isLoading: groupLoading, isError: groupError } = useQuery({
     queryKey: ['group', id],
     queryFn:  () => fetchGroupById(id!),
     enabled:  !!id,
   })
 
+  const {
+    data:      enrollments = [],
+    isLoading: enrollmentsLoading,
+    isError:   enrollmentsError,
+  } = useQuery({
+    queryKey: ['enrollments', id],
+    queryFn:  () => fetchEnrollmentsByGroup(id!, token!),
+    enabled:  !!id && !!token,
+  })
+
+  const isLoading = groupLoading || enrollmentsLoading
+
   function goToAttendance() {
-    navigate(`${ROUTES.ATTENDANCE}?groupId=${group!.id}`)
+    navigate(`${ROUTES.ATTENDANCE}?groupId=${id}`)
   }
 
-  if (isLoading) {
+  if (groupLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center py-24">
@@ -89,7 +104,7 @@ export function GroupDetailsPage() {
     )
   }
 
-  if (isError || !group) {
+  if (groupError || !group) {
     return (
       <DashboardLayout>
         <Header title="Guruh topilmadi" backPath={ROUTES.GROUPS} />
@@ -104,11 +119,13 @@ export function GroupDetailsPage() {
     )
   }
 
+  const studentCount = enrollments.length
+
   return (
     <DashboardLayout>
       <Header
         title={group.name}
-        subtitle={`${group.studentCount} o'quvchi`}
+        subtitle={`${studentCount} o'quvchi`}
         backPath={ROUTES.GROUPS}
         action={
           <Button onClick={goToAttendance} size="default" className="gap-2">
@@ -122,7 +139,7 @@ export function GroupDetailsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <StatCard
           label="O'quvchilar"
-          value={`${group.studentCount} nafar`}
+          value={`${studentCount} nafar`}
           icon={<Users size={15} />}
         />
         <StatCard
@@ -142,7 +159,9 @@ export function GroupDetailsPage() {
         <CardHeader className="px-6 py-4 pb-0">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">O'quvchilar ro'yxati</CardTitle>
-            <Badge variant="outline">{group.studentCount} nafar</Badge>
+            {!enrollmentsLoading && (
+              <Badge variant="outline">{studentCount} nafar</Badge>
+            )}
           </div>
         </CardHeader>
 
@@ -160,35 +179,51 @@ export function GroupDetailsPage() {
           <TableBody>
             {isLoading ? (
               <TableSkeletonRows />
+            ) : enrollmentsError ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-sm text-brown-400 py-8">
+                  O'quvchilar yuklanmadi
+                </TableCell>
+              </TableRow>
+            ) : enrollments.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-sm text-brown-400 py-8">
+                  Hali o'quvchi yo'q
+                </TableCell>
+              </TableRow>
             ) : (
-              group.students.map((student, idx) => (
-                <TableRow key={student.id}>
-                  <TableCell className="pl-6 text-brown-400 text-xs font-mono">
-                    {idx + 1}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2.5">
-                      <Avatar size="sm">
-                        <AvatarFallback initials={student.name.charAt(0)} />
-                      </Avatar>
-                      <span className="font-medium text-brown-900">{student.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    {student.phone ? (
+              enrollments.map((enrollment, idx) => {
+                const s    = enrollment.student
+                const name = `${s.firstName} ${s.lastName}`
+                const phone = String(s.phone)
+
+                return (
+                  <TableRow key={enrollment._id}>
+                    <TableCell className="pl-6 text-brown-400 text-xs font-mono">
+                      {idx + 1}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2.5">
+                        <Avatar size="sm">
+                          <AvatarFallback initials={s.firstName.charAt(0)} />
+                        </Avatar>
+                        <span className="font-medium text-brown-900">{name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       <span className="flex items-center gap-1.5 text-brown-600 font-mono text-xs">
                         <Phone size={12} />
-                        {student.phone}
+                        {phone}
                       </span>
-                    ) : (
-                      <span className="text-brown-300 text-xs">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <Badge variant="success">Faol</Badge>
-                  </TableCell>
-                </TableRow>
-              ))
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      <Badge variant={enrollment.status === 'active' ? 'success' : 'outline'}>
+                        {enrollment.status === 'active' ? 'Faol' : enrollment.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>

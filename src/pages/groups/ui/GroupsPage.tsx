@@ -1,14 +1,15 @@
-import { useQuery }   from '@tanstack/react-query'
+import { useQuery }    from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { Users, Clock, ArrowRight, BookOpen } from 'lucide-react'
-import { fetchGroups }     from '@/entities/group/model/api'
+import { fetchGroups }      from '@/entities/group/model/api'
 import { groupDetailsPath } from '@/shared/config/routes'
-import { DashboardLayout } from '@/widgets/dashboard-layout/ui/DashboardLayout'
-import { Header }          from '@/widgets/header/ui/Header'
+import { useAuth }          from '@/app/providers/AuthProvider'
+import { DashboardLayout }  from '@/widgets/dashboard-layout/ui/DashboardLayout'
+import { Header }           from '@/widgets/header/ui/Header'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge }           from '@/components/ui/badge'
-import { Skeleton }        from '@/components/ui/skeleton'
-import { cn }              from '@/lib/utils'
+import { Badge }            from '@/components/ui/badge'
+import { Skeleton }         from '@/components/ui/skeleton'
+import { cn }               from '@/lib/utils'
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
 
@@ -45,10 +46,13 @@ function EmptyGroups({ title, description }: { title: string; description: strin
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function GroupsPage() {
-  const navigate = useNavigate()
+  const navigate    = useNavigate()
+  const { token }   = useAuth()
+
   const { data: groups = [], isLoading, isError } = useQuery({
     queryKey: ['groups'],
-    queryFn:  fetchGroups,
+    queryFn:  () => fetchGroups(token!),
+    enabled:  !!token,
   })
 
   return (
@@ -96,13 +100,27 @@ export function GroupsPage() {
                   <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-brown-50 text-brown-600 shrink-0">
                     <BookOpen size={20} />
                   </div>
-                  <Badge variant="default">{group.studentCount} o'quvchi</Badge>
+                  <Badge variant="default">
+                    {group.price.toLocaleString()} so'm
+                  </Badge>
                 </div>
 
                 {/* Name */}
-                <h3 className="text-sm font-semibold text-brown-900 mb-3 leading-snug">
+                <h3 className="text-sm font-semibold text-brown-900 mb-1 leading-snug">
                   {group.name}
                 </h3>
+
+                {/* Description */}
+                {group.description && (
+                  <p className="text-xs text-brown-400 mb-3 line-clamp-2">
+                    {group.description}
+                  </p>
+                )}
+
+                {/* Teacher */}
+                <p className="text-xs text-brown-500 mb-3">
+                  {group.teacher.firstName} {group.teacher.lastName}
+                </p>
 
                 {/* Schedule */}
                 <div className="flex flex-col gap-1.5 mb-5">

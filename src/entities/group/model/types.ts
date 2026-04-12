@@ -9,10 +9,48 @@ export interface GroupSchedule {
   time: string
 }
 
+export interface GroupTeacher {
+  _id:       string
+  firstName: string
+  lastName:  string
+  phone:     number
+}
+
 export interface Group {
-  id: string
-  name: string
+  id:          string
+  name:        string
+  description: string
+  price:       number
+  teacher:     GroupTeacher
+  schedule:    GroupSchedule
+  room:        string
+  createdBy:   string
+  createdAt:   string
+  updatedAt:   string
+  // kept for attendance page compatibility
   studentCount: number
-  schedule: GroupSchedule
-  students: Student[]
+  students:     Student[]
+}
+
+export interface GroupsResponse {
+  groups:     ApiGroup[]
+  total:      number
+  page:       number
+  limit:      number
+  totalPages: number
+  code:       string
+  message:    string
+}
+
+export interface ApiGroup {
+  _id:         string
+  name:        string
+  description: string
+  price:       number
+  teacher:     GroupTeacher
+  schedule:    GroupSchedule
+  room:        string
+  createdBy:   string
+  createdAt:   string
+  updatedAt:   string
 }
