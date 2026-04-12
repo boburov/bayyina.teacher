@@ -16,15 +16,28 @@ export default {
           800: '#65443c',
           900: '#271816',
         },
-        cream: '#faf7f5',
+        // neutral token used for all borders, backgrounds, muted text
+        border:  '#E5E7EB',
+        surface: '#F9FAFB',
+        cream:   '#F9FAFB',
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        soft:         '0 2px 12px 0 rgba(101,68,60,0.08)',
-        card:         '0 4px 24px 0 rgba(101,68,60,0.10)',
-        'card-hover': '0 8px 32px 0 rgba(101,68,60,0.16)',
+        soft:         'none',
+        card:         'none',
+        'card-hover': 'none',
+      },
+      borderRadius: {
+        // tighten radius scale — keep existing names but cap values
+        DEFAULT: '6px',
+        sm:  '4px',
+        md:  '6px',
+        lg:  '8px',
+        xl:  '8px',
+        '2xl': '10px',
+        full: '9999px',
       },
       keyframes: {
         slideInRight: {
@@ -37,8 +50,8 @@ export default {
         },
       },
       animation: {
-        slideInRight: 'slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-        fadeIn:       'fadeIn 0.2s ease-out',
+        slideInRight: 'slideInRight 0.2s ease-out',
+        fadeIn:       'fadeIn 0.15s ease-out',
       },
     },
   },

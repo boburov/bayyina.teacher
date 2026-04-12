@@ -18,8 +18,8 @@ export function Card({ hover = false, padding = 'md', className, children, ...pr
   return (
     <div
       className={cn(
-        'bg-white rounded-2xl border border-brown-100 shadow-soft',
-        hover && 'transition-shadow duration-200 hover:shadow-card-hover cursor-pointer',
+        'bg-white rounded-lg border border-gray-200',
+        hover && 'transition-colors cursor-pointer hover:bg-gray-50',
         paddingMap[padding],
         className,
       )}
@@ -40,8 +40,8 @@ export function CardHeader({ title, subtitle, action }: CardHeaderProps) {
   return (
     <div className="flex items-start justify-between gap-4 mb-5">
       <div>
-        <h2 className="text-base font-semibold text-brown-900">{title}</h2>
-        {subtitle && <p className="text-sm text-brown-500 mt-0.5">{subtitle}</p>}
+        <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+        {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
       </div>
       {action}
     </div>

@@ -24,21 +24,21 @@ export function Header({ title, subtitle, backPath, action }: HeaderProps) {
               size="icon"
               onClick={() => navigate(backPath)}
               aria-label="Orqaga"
-              className="h-8 w-8 rounded-xl shrink-0"
+              className="h-8 w-8 rounded-md shrink-0"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={15} />
             </Button>
           )}
           <div>
-            <h1 className="text-xl font-semibold text-brown-900 leading-tight">{title}</h1>
+            <h1 className="text-lg font-semibold text-gray-900 leading-tight">{title}</h1>
             {subtitle && (
-              <p className="text-sm text-brown-400 mt-0.5">{subtitle}</p>
+              <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
             )}
           </div>
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>
-      <Separator className="mt-5" />
+      <Separator className="mt-4" />
     </div>
   )
 }

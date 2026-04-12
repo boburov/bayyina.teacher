@@ -15,15 +15,15 @@ import { cn }               from '@/lib/utils'
 
 function GroupCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-brown-100 shadow-soft p-6 space-y-4">
+    <div className="bg-white rounded-lg border border-gray-200 p-5 space-y-4">
       <div className="flex items-start justify-between">
-        <Skeleton className="w-10 h-10 rounded-xl" />
-        <Skeleton className="w-20 h-6 rounded-full" />
+        <Skeleton className="w-9 h-9 rounded-md" />
+        <Skeleton className="w-20 h-5 rounded" />
       </div>
-      <Skeleton className="w-3/4 h-4 rounded-lg" />
+      <Skeleton className="w-3/4 h-4 rounded" />
       <div className="space-y-2">
-        <Skeleton className="w-full h-3 rounded-lg" />
-        <Skeleton className="w-2/3 h-3 rounded-lg" />
+        <Skeleton className="w-full h-3 rounded" />
+        <Skeleton className="w-2/3 h-3 rounded" />
       </div>
     </div>
   )
@@ -34,11 +34,11 @@ function GroupCardSkeleton() {
 function EmptyGroups({ title, description }: { title: string; description: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-brown-50 text-brown-300 mb-4">
-        <Users size={28} />
+      <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gray-100 text-gray-400 mb-4">
+        <Users size={22} />
       </div>
-      <p className="text-base font-medium text-brown-700">{title}</p>
-      <p className="text-sm text-brown-400 mt-1 max-w-xs">{description}</p>
+      <p className="text-sm font-medium text-gray-700">{title}</p>
+      <p className="text-sm text-gray-500 mt-1 max-w-xs">{description}</p>
     </div>
   )
 }
@@ -90,54 +90,54 @@ export function GroupsPage() {
               key={group.id}
               onClick={() => navigate(groupDetailsPath(group.id))}
               className={cn(
-                'cursor-pointer transition-all duration-200',
-                'hover:shadow-card-hover hover:-translate-y-0.5',
+                'cursor-pointer transition-colors',
+                'hover:bg-gray-50',
               )}
             >
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 {/* Top row */}
                 <div className="flex items-start justify-between gap-2 mb-4">
-                  <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-brown-50 text-brown-600 shrink-0">
-                    <BookOpen size={20} />
+                  <div className="flex items-center justify-center w-9 h-9 rounded-md bg-gray-100 text-gray-600 shrink-0">
+                    <BookOpen size={17} />
                   </div>
-                  <Badge variant="default">
+                  <Badge variant="outline">
                     {group.price.toLocaleString()} so'm
                   </Badge>
                 </div>
 
                 {/* Name */}
-                <h3 className="text-sm font-semibold text-brown-900 mb-1 leading-snug">
+                <h3 className="text-sm font-semibold text-gray-900 mb-1 leading-snug">
                   {group.name}
                 </h3>
 
                 {/* Description */}
                 {group.description && (
-                  <p className="text-xs text-brown-400 mb-3 line-clamp-2">
+                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">
                     {group.description}
                   </p>
                 )}
 
                 {/* Teacher */}
-                <p className="text-xs text-brown-500 mb-3">
+                <p className="text-xs text-gray-500 mb-3">
                   {group.teacher.firstName} {group.teacher.lastName}
                 </p>
 
                 {/* Schedule */}
-                <div className="flex flex-col gap-1.5 mb-5">
-                  <div className="flex items-center gap-2 text-xs text-brown-500">
-                    <Users size={12} className="shrink-0 text-brown-400" />
+                <div className="flex flex-col gap-1.5 mb-4">
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Users size={11} className="shrink-0 text-gray-400" />
                     <span>{group.schedule.days.join(', ')}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-brown-500">
-                    <Clock size={12} className="shrink-0 text-brown-400" />
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Clock size={11} className="shrink-0 text-gray-400" />
                     <span>{group.schedule.time}</span>
                   </div>
                 </div>
 
                 {/* CTA row */}
-                <div className="flex items-center gap-1 text-xs font-medium text-brown-600 hover:text-brown-900 transition-colors">
+                <div className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors pt-3 border-t border-gray-100">
                   Batafsil ko'rish
-                  <ArrowRight size={13} />
+                  <ArrowRight size={12} />
                 </div>
               </CardContent>
             </Card>

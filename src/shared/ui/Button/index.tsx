@@ -14,19 +14,19 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'bg-brown-800 text-white hover:bg-brown-900 active:bg-brown-900 shadow-soft',
+    'bg-brown-800 text-white hover:bg-brown-900 active:bg-brown-900',
   secondary:
-    'bg-brown-100 text-brown-800 hover:bg-brown-200 active:bg-brown-200',
+    'bg-gray-100 text-gray-800 hover:bg-gray-200 active:bg-gray-200 border border-gray-200',
   ghost:
-    'bg-transparent text-brown-700 hover:bg-brown-50 active:bg-brown-100',
+    'bg-transparent text-gray-700 hover:bg-gray-100 active:bg-gray-100',
   danger:
-    'bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-200',
+    'bg-red-50 text-red-600 hover:bg-red-100 active:bg-red-100 border border-red-200',
 }
 
 const sizeClasses: Record<Size, string> = {
-  sm: 'h-8  px-3   text-sm   rounded-xl  gap-1.5',
-  md: 'h-10 px-4   text-sm   rounded-xl  gap-2',
-  lg: 'h-12 px-6   text-base rounded-2xl gap-2',
+  sm: 'h-8  px-3   text-xs   rounded-md  gap-1.5',
+  md: 'h-9  px-4   text-sm   rounded-md  gap-2',
+  lg: 'h-11 px-6   text-sm   rounded-md  gap-2',
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -49,8 +49,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         className={cn(
           'inline-flex items-center justify-center font-medium',
-          'transition-all duration-150 ease-out',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brown-400 focus-visible:ring-offset-2',
+          'transition-colors duration-100',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2',
           'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
           'select-none',
           variantClasses[variant],

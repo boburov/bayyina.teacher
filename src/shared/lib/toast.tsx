@@ -32,36 +32,36 @@ export function useToast(): ToastContextValue {
 // ─── Individual toast ─────────────────────────────────────────────────────────
 
 const ICONS: Record<ToastType, ReactNode> = {
-  success: <CheckCircle size={17} className="text-emerald-500 shrink-0" />,
-  error:   <XCircle    size={17} className="text-red-500    shrink-0" />,
-  info:    <Info       size={17} className="text-blue-500   shrink-0" />,
+  success: <CheckCircle size={15} className="text-emerald-500 shrink-0" />,
+  error:   <XCircle    size={15} className="text-red-500    shrink-0" />,
+  info:    <Info       size={15} className="text-blue-500   shrink-0" />,
 }
 
 const BORDER: Record<ToastType, string> = {
-  success: 'border-l-emerald-400',
-  error:   'border-l-red-400',
-  info:    'border-l-blue-400',
+  success: 'border-l-emerald-500',
+  error:   'border-l-red-500',
+  info:    'border-l-blue-500',
 }
 
 function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) => void }) {
   return (
     <div
       className={cn(
-        'flex items-center gap-3 bg-white border border-brown-100 border-l-4 rounded-xl shadow-card',
+        'flex items-center gap-3 bg-white border border-gray-200 border-l-4 rounded-lg',
         'px-4 py-3 min-w-[15rem] max-w-[22rem] w-full',
-        'animate-[slideInRight_0.25s_ease-out]',
+        'animate-[slideInRight_0.2s_ease-out]',
         BORDER[toast.type],
       )}
       role="alert"
     >
       {ICONS[toast.type]}
-      <p className="flex-1 text-sm font-medium text-brown-900 leading-snug">{toast.message}</p>
+      <p className="flex-1 text-sm font-medium text-gray-900 leading-snug">{toast.message}</p>
       <button
         onClick={() => onRemove(toast.id)}
-        className="text-brown-300 hover:text-brown-600 transition-colors shrink-0"
+        className="text-gray-400 hover:text-gray-700 transition-colors shrink-0"
         aria-label="Yopish"
       >
-        <X size={14} />
+        <X size={13} />
       </button>
     </div>
   )

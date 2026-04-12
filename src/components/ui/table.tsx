@@ -19,7 +19,7 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn('[&_tr]:border-b [&_tr]:border-brown-100', className)} {...props} />
+  <thead ref={ref} className={cn('[&_tr]:border-b [&_tr]:border-gray-200', className)} {...props} />
 ))
 TableHeader.displayName = 'TableHeader'
 
@@ -41,7 +41,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn('border-t border-brown-100 bg-brown-50/50 font-medium [&>tr]:last:border-b-0', className)}
+    className={cn('border-t border-gray-200 bg-gray-50 font-medium [&>tr]:last:border-b-0', className)}
     {...props}
   />
 ))
@@ -54,7 +54,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      'border-b border-brown-50 transition-colors hover:bg-brown-50/60 data-[state=selected]:bg-brown-100',
+      'border-b border-gray-100 transition-colors hover:bg-gray-50 data-[state=selected]:bg-gray-100',
       className,
     )}
     {...props}
@@ -69,7 +69,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      'h-11 px-4 text-left align-middle text-xs font-medium uppercase tracking-wider text-brown-400 [&:has([role=checkbox])]:pr-0',
+      'h-10 px-4 text-left align-middle text-xs font-medium uppercase tracking-wider text-gray-500 [&:has([role=checkbox])]:pr-0',
       className,
     )}
     {...props}
@@ -84,7 +84,7 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      'px-4 py-3.5 align-middle text-sm text-brown-700 [&:has([role=checkbox])]:pr-0',
+      'px-4 py-3 align-middle text-sm text-gray-700 [&:has([role=checkbox])]:pr-0',
       className,
     )}
     {...props}
@@ -98,7 +98,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn('mt-4 text-sm text-brown-400', className)}
+    className={cn('mt-4 text-sm text-gray-500', className)}
     {...props}
   />
 ))

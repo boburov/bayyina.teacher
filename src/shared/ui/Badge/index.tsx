@@ -10,7 +10,7 @@ interface BadgeProps {
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default: 'bg-brown-100 text-brown-700',
+  default: 'bg-gray-100 text-gray-700',
   success: 'bg-emerald-50 text-emerald-700',
   warning: 'bg-amber-50  text-amber-700',
   danger:  'bg-red-50    text-red-600',
@@ -21,7 +21,7 @@ export function Badge({ variant = 'default', children, className }: BadgeProps) 
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+        'inline-flex items-center px-2 py-0.5 rounded border text-xs font-medium',
         variantClasses[variant],
         className,
       )}

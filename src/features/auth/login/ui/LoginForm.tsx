@@ -19,7 +19,7 @@ export function LoginForm() {
         <div className="relative">
           <Phone
             size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400 pointer-events-none"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
           />
           <Input
             id="phone"
@@ -45,7 +45,7 @@ export function LoginForm() {
         <div className="relative">
           <Lock
             size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400 pointer-events-none"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
           />
           <Input
             id="password"
@@ -62,7 +62,7 @@ export function LoginForm() {
             onClick={() => setShowPassword((s) => !s)}
             className={cn(
               'absolute right-3 top-1/2 -translate-y-1/2',
-              'text-brown-400 hover:text-brown-600 transition-colors',
+              'text-gray-400 hover:text-brown-600 transition-colors',
             )}
             tabIndex={-1}
             aria-label={showPassword ? 'Parolni yashirish' : 'Parolni ko\'rsatish'}
@@ -77,7 +77,7 @@ export function LoginForm() {
 
       {/* General error */}
       {errors.general && (
-        <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
           {errors.general}
         </div>
       )}
@@ -87,7 +87,7 @@ export function LoginForm() {
       </Button>
 
       {/* Demo hint */}
-      <p className="text-center text-xs text-brown-400">
+      <p className="text-center text-xs text-gray-400">
         Demo:{' '}
         <span className="font-medium text-brown-600">+998 90 123 45 67</span>
         {' '}/ istalgan 3+ belgili parol

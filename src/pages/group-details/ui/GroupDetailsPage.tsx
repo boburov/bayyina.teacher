@@ -33,11 +33,11 @@ function StatCard({ label, value, icon }: { label: string; value: string; icon: 
   return (
     <Card>
       <CardContent className="px-5 py-4">
-        <div className="flex items-center gap-2 text-brown-400 mb-1.5">
+        <div className="flex items-center gap-2 text-gray-400 mb-1.5">
           {icon}
-          <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
+          <span className="text-xs font-medium uppercase tracking-wider text-gray-500">{label}</span>
         </div>
-        <p className="text-sm font-semibold text-brown-900">{value}</p>
+        <p className="text-sm font-semibold text-gray-900">{value}</p>
       </CardContent>
     </Card>
   )
@@ -58,7 +58,7 @@ function TableSkeletonRows() {
             </div>
           </TableCell>
           <TableCell className="hidden sm:table-cell"><Skeleton className="w-36 h-4" /></TableCell>
-          <TableCell className="hidden sm:table-cell"><Skeleton className="w-14 h-6 rounded-full" /></TableCell>
+          <TableCell className="hidden sm:table-cell"><Skeleton className="w-14 h-5 rounded" /></TableCell>
         </TableRow>
       ))}
     </>
@@ -98,7 +98,7 @@ export function GroupDetailsPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center py-24">
-          <Loader2 size={28} className="animate-spin text-brown-400" />
+          <Loader2 size={24} className="animate-spin text-gray-400" />
         </div>
       </DashboardLayout>
     )
@@ -109,11 +109,11 @@ export function GroupDetailsPage() {
       <DashboardLayout>
         <Header title="Guruh topilmadi" backPath={ROUTES.GROUPS} />
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-brown-50 text-brown-300 mb-4">
-            <Users size={28} />
+          <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gray-100 text-gray-400 mb-4">
+            <Users size={22} />
           </div>
-          <p className="text-base font-medium text-brown-700">Bunday guruh mavjud emas</p>
-          <p className="text-sm text-brown-400 mt-1">URL to'g'ri ekanligini tekshiring.</p>
+          <p className="text-sm font-medium text-gray-700">Bunday guruh mavjud emas</p>
+          <p className="text-sm text-gray-500 mt-1">URL to'g'ri ekanligini tekshiring.</p>
         </div>
       </DashboardLayout>
     )
@@ -129,7 +129,7 @@ export function GroupDetailsPage() {
         backPath={ROUTES.GROUPS}
         action={
           <Button onClick={goToAttendance} size="default" className="gap-2">
-            <CalendarCheck size={15} />
+            <CalendarCheck size={14} />
             Davomatga o'tish
           </Button>
         }
@@ -140,17 +140,17 @@ export function GroupDetailsPage() {
         <StatCard
           label="O'quvchilar"
           value={`${studentCount} nafar`}
-          icon={<Users size={15} />}
+          icon={<Users size={14} />}
         />
         <StatCard
           label="Dars kunlari"
           value={group.schedule.days.join(', ')}
-          icon={<Clock size={15} />}
+          icon={<Clock size={14} />}
         />
         <StatCard
           label="Dars vaqti"
           value={group.schedule.time}
-          icon={<Clock size={15} />}
+          icon={<Clock size={14} />}
         />
       </div>
 
@@ -158,7 +158,7 @@ export function GroupDetailsPage() {
       <Card className="overflow-hidden">
         <CardHeader className="px-6 py-4 pb-0">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">O'quvchilar ro'yxati</CardTitle>
+            <CardTitle className="text-sm font-semibold text-gray-900">O'quvchilar ro'yxati</CardTitle>
             {!enrollmentsLoading && (
               <Badge variant="outline">{studentCount} nafar</Badge>
             )}
@@ -169,7 +169,7 @@ export function GroupDetailsPage() {
 
         <Table>
           <TableHeader>
-            <TableRow className="bg-brown-50/60 hover:bg-brown-50/60">
+            <TableRow className="bg-gray-50 hover:bg-gray-50">
               <TableHead className="w-12 pl-6">#</TableHead>
               <TableHead>Ism Familiya</TableHead>
               <TableHead className="hidden sm:table-cell">Telefon</TableHead>
@@ -181,13 +181,13 @@ export function GroupDetailsPage() {
               <TableSkeletonRows />
             ) : enrollmentsError ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-sm text-brown-400 py-8">
+                <TableCell colSpan={4} className="text-center text-sm text-gray-500 py-8">
                   O'quvchilar yuklanmadi
                 </TableCell>
               </TableRow>
             ) : enrollments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-sm text-brown-400 py-8">
+                <TableCell colSpan={4} className="text-center text-sm text-gray-500 py-8">
                   Hali o'quvchi yo'q
                 </TableCell>
               </TableRow>
@@ -199,7 +199,7 @@ export function GroupDetailsPage() {
 
                 return (
                   <TableRow key={enrollment._id}>
-                    <TableCell className="pl-6 text-brown-400 text-xs font-mono">
+                    <TableCell className="pl-6 text-gray-400 text-xs font-mono">
                       {idx + 1}
                     </TableCell>
                     <TableCell>
@@ -207,12 +207,12 @@ export function GroupDetailsPage() {
                         <Avatar size="sm">
                           <AvatarFallback initials={s.firstName.charAt(0)} />
                         </Avatar>
-                        <span className="font-medium text-brown-900">{name}</span>
+                        <span className="font-medium text-gray-900">{name}</span>
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      <span className="flex items-center gap-1.5 text-brown-600 font-mono text-xs">
-                        <Phone size={12} />
+                      <span className="flex items-center gap-1.5 text-gray-600 font-mono text-xs">
+                        <Phone size={11} />
                         {phone}
                       </span>
                     </TableCell>
@@ -232,7 +232,7 @@ export function GroupDetailsPage() {
         <Separator />
         <div className="px-6 py-4 flex justify-end">
           <Button variant="outline" size="sm" onClick={goToAttendance} className="gap-1.5">
-            <CalendarCheck size={14} />
+            <CalendarCheck size={13} />
             Davomatni boshqarish
           </Button>
         </div>

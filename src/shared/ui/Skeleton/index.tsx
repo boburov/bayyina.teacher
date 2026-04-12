@@ -2,22 +2,24 @@ import { cn } from '@/shared/lib/cn'
 
 interface SkeletonProps {
   className?: string
+  style?: React.CSSProperties
 }
 
-export function Skeleton({ className }: SkeletonProps) {
+export function Skeleton({ className, style }: SkeletonProps) {
   return (
     <div
       className={cn(
-        'bg-brown-100 rounded-xl animate-pulse',
+        'bg-gray-200 rounded animate-pulse',
         className,
       )}
+      style={style}
     />
   )
 }
 
 export function CardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-brown-100 shadow-soft p-6">
+    <div className="bg-white rounded-lg border border-gray-200 p-5">
       <Skeleton className="h-5 w-2/5 mb-4" />
       <Skeleton className="h-4 w-3/5 mb-2" />
       <Skeleton className="h-4 w-2/5 mb-5" />
