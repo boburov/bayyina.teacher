@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { submitAttendance } from '@/entities/attendance/model/api'
+import { submitBulkAttendance } from '@/entities/attendance/model/api'
 import type { AttendanceStatus } from '@/entities/attendance/model/types'
 import type { Student } from '@/entities/group/model/types'
 
@@ -29,11 +29,14 @@ export function useAttendanceForm(groupId: string, students: Student[]) {
 
   const mutation = useMutation({
     mutationFn: () =>
-      submitAttendance({
-        groupId,
-        date: today,
-        entries: students.map((s) => ({ studentId: s.id, status: statuses[s.id] })),
-      }),
+      submitBulkAttendance(
+        {
+          group:   groupId,
+          date:    today,
+          entries: students.map((s) => ({ enrollment: s.id, status: statuses[s.id] })),
+        },
+        '',
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['attendance', groupId] })
       setSubmitted(true)

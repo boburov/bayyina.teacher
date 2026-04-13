@@ -1,115 +1,170 @@
-import { Check, X, CheckSquare, XSquare, Save, Users } from 'lucide-react'
-import type { Group } from '@/entities/group/model/types'
+import {
+  Check, X, CheckSquare, XSquare, Save,
+  Users, ChevronLeft, ChevronRight, AlertCircle,
+} from 'lucide-react'
 import { useAttendanceTable } from '../model/useAttendanceTable'
-import { AttendanceCell } from './AttendanceCell'
-import { Button }   from '@/shared/ui/Button'
-import { Skeleton } from '@/shared/ui/Skeleton'
-import { cn }       from '@/shared/lib/cn'
-import { parseColumnHeader } from '@/shared/lib/dates'
+import type { AttendanceStatus } from '@/entities/attendance/model/types'
+import {
+  Table, TableBody, TableCell, TableHead,
+  TableHeader, TableRow,
+} from '@/components/ui/table'
+import { Badge }     from '@/components/ui/badge'
+import { Button }    from '@/components/ui/button'
+import { Skeleton }  from '@/components/ui/skeleton'
+import { Separator } from '@/components/ui/separator'
+import { cn }        from '@/lib/utils'
 
 interface AttendanceTableProps {
-  group: Group
+  groupId: string
+  date:    string
 }
 
-// ─── Skeleton while loading ────────────────────────────────────────────────────
+// ─── Status toggle button ─────────────────────────────────────────────────────
 
-function AttendanceTableSkeleton() {
+interface StatusToggleProps {
+  status:   AttendanceStatus
+  onChange: (s: AttendanceStatus) => void
+}
+
+function StatusToggle({ status, onChange }: StatusToggleProps) {
+  const isPresent = status === 'present'
   return (
-    <div className="space-y-3 animate-pulse">
-      <div className="flex gap-2 mb-4">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-8 w-32" />
-      </div>
-      <div className="overflow-hidden rounded-lg border border-gray-200">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="flex border-b border-gray-100 last:border-0">
-            <Skeleton className="h-11 w-44 m-2 rounded shrink-0" />
-            {Array.from({ length: 10 }).map((__, j) => (
-              <Skeleton key={j} className="h-7 w-7 m-2 rounded shrink-0" />
-            ))}
-          </div>
-        ))}
+    <button
+      type="button"
+      onClick={() => onChange(isPresent ? 'absent' : 'present')}
+      aria-label={isPresent ? 'Keldi' : 'Kelmadi'}
+      className={cn(
+        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold',
+        'border transition-all duration-150 active:scale-95',
+        isPresent
+          ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
+          : 'bg-rose-50   border-rose-200   text-rose-600   hover:bg-rose-100',
+      )}
+    >
+      {isPresent
+        ? <Check size={11} strokeWidth={3} />
+        : <X     size={11} strokeWidth={3} />
+      }
+      {isPresent ? 'Keldi' : 'Kelmadi'}
+    </button>
+  )
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function TableSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <TableRow key={i} className="hover:bg-transparent">
+          <TableCell><Skeleton className="w-5 h-4" /></TableCell>
+          <TableCell>
+            <div className="flex items-center gap-2.5">
+              <Skeleton className="w-7 h-7 rounded-full" />
+              <Skeleton className="w-36 h-4" />
+            </div>
+          </TableCell>
+          <TableCell className="hidden sm:table-cell"><Skeleton className="w-28 h-4" /></TableCell>
+          <TableCell><Skeleton className="w-20 h-7 rounded-md" /></TableCell>
+          <TableCell className="hidden md:table-cell"><Skeleton className="w-32 h-4" /></TableCell>
+        </TableRow>
+      ))}
+    </>
+  )
+}
+
+// ─── Pagination ────────────────────────────────────────────────────────────────
+
+interface PaginationProps {
+  page:       number
+  totalPages: number
+  totalRows:  number
+  onPrev:     () => void
+  onNext:     () => void
+}
+
+function Pagination({ page, totalPages, totalRows, onPrev, onNext }: PaginationProps) {
+  if (totalPages <= 1) return null
+  return (
+    <div className="flex items-center justify-between px-6 py-3">
+      <span className="text-xs text-gray-500">
+        Jami {totalRows} o'quvchi · {page}/{totalPages}-sahifa
+      </span>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onPrev}
+          disabled={page === 1}
+          className="w-8 h-8 p-0"
+        >
+          <ChevronLeft size={14} />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onNext}
+          disabled={page === totalPages}
+          className="w-8 h-8 p-0"
+        >
+          <ChevronRight size={14} />
+        </Button>
       </div>
     </div>
   )
 }
 
-// ─── Legend ───────────────────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
-function Legend() {
-  return (
-    <div className="flex items-center gap-4 text-xs text-gray-500">
-      <span className="flex items-center gap-1.5">
-        <span className="flex items-center justify-center w-5 h-5 rounded bg-emerald-500">
-          <Check size={10} strokeWidth={3} className="text-white" />
-        </span>
-        Keldi
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="flex items-center justify-center w-5 h-5 rounded bg-rose-500">
-          <X size={10} strokeWidth={3} className="text-white" />
-        </span>
-        Kelmadi
-      </span>
-      <span className="flex items-center gap-1.5 ml-2 text-gray-400 border-l border-gray-200 pl-4">
-        <span className="inline-block w-3 h-3 rounded-sm bg-amber-200 border border-amber-300" />
-        Bugun (tahrirlash mumkin)
-      </span>
-    </div>
-  )
-}
-
-// ─── Main component ────────────────────────────────────────────────────────────
-
-export function AttendanceTable({ group }: AttendanceTableProps) {
+export function AttendanceTable({ groupId, date }: AttendanceTableProps) {
   const {
-    dates,
-    historyRecords,
-    todayStatuses,
-    today,
+    session,
     isLoading,
-    isSubmitting,
-    setStudentStatus,
+    isError,
+    pagedRows,
+    statuses,
+    notes,
+    setStatus,
+    setNote,
     markAll,
     submit,
+    isSubmitting,
     presentCount,
     absentCount,
-  } = useAttendanceTable(group)
-
-  if (isLoading) return <AttendanceTableSkeleton />
-
-  if (group.students.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3 text-gray-400">
-        <Users size={36} className="opacity-40" />
-        <p className="text-sm font-medium">Ushbu guruhda o'quvchilar yo'q</p>
-      </div>
-    )
-  }
+    totalRows,
+    page,
+    totalPages,
+    setPage,
+  } = useAttendanceTable(groupId, date)
 
   return (
-    <div className="space-y-4">
-      {/* ── Top bar: stats + bulk actions ───────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Today summary */}
-        <div className="flex items-center gap-2 text-sm">
-          <span className="flex items-center gap-1.5 font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md text-xs">
-            <Check size={12} strokeWidth={2.5} />
+    <div className="space-y-0 rounded-lg border border-gray-200 overflow-hidden">
+
+      {/* ── Stats + bulk actions ────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-3 px-6 py-3 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+            <Check size={11} strokeWidth={3} />
             {presentCount} keldi
           </span>
-          <span className="flex items-center gap-1.5 font-medium text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-md text-xs">
-            <X size={12} strokeWidth={2.5} />
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-md">
+            <X size={11} strokeWidth={3} />
             {absentCount} kelmadi
           </span>
+          {session && (
+            <Badge variant="outline" className="text-xs">
+              {totalRows} nafar
+            </Badge>
+          )}
         </div>
 
-        {/* Bulk mark buttons */}
         <div className="ml-auto flex gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => markAll('present')}
-            className="text-emerald-700 hover:bg-emerald-50 gap-1.5"
+            disabled={isLoading || totalRows === 0}
+            className="text-emerald-700 hover:bg-emerald-50 gap-1.5 text-xs"
           >
             <CheckSquare size={13} />
             Barchasi keldi
@@ -118,7 +173,8 @@ export function AttendanceTable({ group }: AttendanceTableProps) {
             variant="ghost"
             size="sm"
             onClick={() => markAll('absent')}
-            className="text-rose-600 hover:bg-rose-50 gap-1.5"
+            disabled={isLoading || totalRows === 0}
+            className="text-rose-600 hover:bg-rose-50 gap-1.5 text-xs"
           >
             <XSquare size={13} />
             Barchasi kelmadi
@@ -126,139 +182,126 @@ export function AttendanceTable({ group }: AttendanceTableProps) {
         </div>
       </div>
 
-      {/* ── The table ────────────────────────────────────────────────── */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200 scrollbar-thin">
-        <table
-          className="border-separate border-spacing-0"
-          style={{ width: 'max-content', minWidth: '100%' }}
-        >
-          {/* ── Header ────────────────────────────────────────────── */}
-          <thead>
-            <tr>
-              {/* Corner — sticky left + top */}
-              <th
-                className={cn(
-                  'sticky left-0 top-0 z-30',
-                  'bg-gray-50 border-b border-r border-gray-200',
-                  'px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider',
-                  'min-w-[200px]',
-                )}
-              >
-                O'quvchi
-              </th>
+      {/* ── Table ───────────────────────────────────────────────────── */}
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-gray-50 hover:bg-gray-50">
+            <TableHead className="w-12 pl-6">#</TableHead>
+            <TableHead>Ism Familiya</TableHead>
+            <TableHead className="hidden sm:table-cell">Telefon</TableHead>
+            <TableHead>Holat</TableHead>
+            <TableHead className="hidden md:table-cell w-48">Izoh</TableHead>
+          </TableRow>
+        </TableHeader>
 
-              {/* Date columns */}
-              {dates.map((date) => {
-                const isT   = date === today
-                const hdr   = parseColumnHeader(date)
-                return (
-                  <th
-                    key={date}
-                    className={cn(
-                      'sticky top-0 z-20',
-                      'border-b border-r border-gray-200',
-                      'px-1 py-2 text-center w-[60px] min-w-[60px]',
-                      isT
-                        ? 'bg-amber-50 border-b-amber-300'
-                        : 'bg-gray-50',
-                    )}
-                  >
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span
-                        className={cn(
-                          'text-[10px] font-medium',
-                          isT ? 'text-amber-600' : 'text-gray-400',
-                        )}
-                      >
-                        {hdr.abbr}
-                      </span>
-                      <span
-                        className={cn(
-                          'text-sm font-bold leading-none',
-                          isT ? 'text-amber-800' : 'text-gray-700',
-                        )}
-                      >
-                        {hdr.day}
-                      </span>
-                      {isT && (
-                        <span className="text-[8px] font-extrabold tracking-widest text-amber-600 uppercase mt-0.5">
-                          Bugun
-                        </span>
-                      )}
-                    </div>
-                  </th>
-                )
-              })}
-            </tr>
-          </thead>
-
-          {/* ── Body ──────────────────────────────────────────────── */}
-          <tbody>
-            {group.students.map((student, rowIdx) => {
-              const isEven = rowIdx % 2 === 0
-              const rowBg  = isEven ? 'bg-white' : 'bg-gray-50/50'
+        <TableBody>
+          {isLoading ? (
+            <TableSkeleton />
+          ) : isError ? (
+            <TableRow>
+              <TableCell colSpan={5} className="py-12">
+                <div className="flex flex-col items-center gap-2 text-gray-500">
+                  <AlertCircle size={20} className="text-gray-400" />
+                  <p className="text-sm font-medium">Davomat ma'lumotlari yuklanmadi</p>
+                  <p className="text-xs text-gray-400">Sahifani yangilab ko'ring</p>
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : totalRows === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="py-12">
+                <div className="flex flex-col items-center gap-2 text-gray-500">
+                  <Users size={20} className="text-gray-400" />
+                  <p className="text-sm font-medium">Ushbu guruhda o'quvchilar yo'q</p>
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : (
+            pagedRows.map((row, idx) => {
+              const globalIdx = (page - 1) * 10 + idx + 1
+              const name      = `${row.student.firstName} ${row.student.lastName}`
+              const phone     = String(row.student.phone)
+              const status    = statuses[row.enrollment] ?? 'present'
 
               return (
-                <tr key={student.id} className={cn('group/row', rowBg)}>
-                  {/* Sticky name cell */}
-                  <td
-                    className={cn(
-                      'sticky left-0 z-10',
-                      'border-b border-r border-gray-100',
-                      'px-4 py-2.5 min-w-[200px]',
-                      'group-hover/row:bg-gray-50 transition-colors',
-                      rowBg,
-                    )}
-                  >
+                <TableRow key={row.enrollment}>
+                  <TableCell className="pl-6 text-gray-400 text-xs font-mono">
+                    {globalIdx}
+                  </TableCell>
+
+                  <TableCell>
                     <div className="flex items-center gap-2.5">
-                      <div className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold shrink-0">
-                        {student.name.charAt(0)}
-                      </div>
-                      <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                        {student.name}
+                      <span className="flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold shrink-0">
+                        {row.student.firstName.charAt(0)}
                       </span>
+                      <span className="font-medium text-gray-900 text-sm">{name}</span>
                     </div>
-                  </td>
+                  </TableCell>
 
-                  {/* Attendance cells */}
-                  {dates.map((date) => {
-                    const isT = date === today
-                    const status = isT
-                      ? (todayStatuses[student.id] ?? 'present')
-                      : (historyRecords[student.id]?.[date] ?? null)
+                  <TableCell className="hidden sm:table-cell text-gray-500 font-mono text-xs">
+                    {phone}
+                  </TableCell>
 
-                    return (
-                      <AttendanceCell
-                        key={date}
-                        status={status}
-                        isToday={isT}
-                        onChange={isT
-                          ? (s) => setStudentStatus(student.id, s)
-                          : undefined
-                        }
-                      />
-                    )
-                  })}
-                </tr>
+                  <TableCell>
+                    <StatusToggle
+                      status={status}
+                      onChange={(s) => setStatus(row.enrollment, s)}
+                    />
+                  </TableCell>
+
+                  <TableCell className="hidden md:table-cell">
+                    <input
+                      type="text"
+                      value={notes[row.enrollment] ?? ''}
+                      onChange={(e) => setNote(row.enrollment, e.target.value)}
+                      placeholder="Izoh..."
+                      className="w-full text-xs text-gray-600 bg-transparent border-b border-gray-200 focus:border-gray-400 focus:outline-none py-1 placeholder:text-gray-300"
+                    />
+                  </TableCell>
+                </TableRow>
               )
-            })}
-          </tbody>
-        </table>
-      </div>
+            })
+          )}
+        </TableBody>
+      </Table>
 
-      {/* ── Legend + Submit row ──────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-        <Legend />
-        <Button
-          variant="primary"
-          size="md"
-          onClick={() => submit()}
-          loading={isSubmitting}
-          className="gap-2"
-        >
-          <Save size={14} />
-          Bugungi davomatni saqlash
-        </Button>
+      {/* ── Pagination ──────────────────────────────────────────────── */}
+      {!isLoading && !isError && totalPages > 1 && (
+        <>
+          <Separator />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalRows={totalRows}
+            onPrev={() => setPage((p) => Math.max(1, p - 1))}
+            onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+          />
+        </>
+      )}
+
+      {/* ── Submit ──────────────────────────────────────────────────── */}
+      <Separator />
+      <div className="px-6 py-4 flex items-center justify-between bg-white">
+        {session?.isValidSchedule === false && (
+          <span className="text-xs text-amber-600 flex items-center gap-1.5">
+            <AlertCircle size={13} />
+            Bu kun jadvalda yo'q
+          </span>
+        )}
+        <div className="ml-auto">
+          <Button
+            onClick={() => submit()}
+            disabled={isLoading || totalRows === 0}
+            className="gap-2"
+            size="default"
+          >
+            {isSubmitting
+              ? <span className="animate-spin inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full" />
+              : <Save size={14} />
+            }
+            Davomatni saqlash
+          </Button>
+        </div>
       </div>
     </div>
   )

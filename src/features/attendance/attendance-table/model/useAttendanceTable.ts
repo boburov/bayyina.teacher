@@ -1,69 +1,77 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  fetchGroupAttendanceHistory,
-  submitAttendance,
-} from '@/entities/attendance/model/api'
-import type { AttendanceStatus } from '@/entities/attendance/model/types'
-import type { Group } from '@/entities/group/model/types'
-import { getLocalDateString } from '@/shared/lib/dates'
+import { fetchAttendanceSession, submitBulkAttendance } from '@/entities/attendance/model/api'
+import type { AttendanceStatus, AttendanceBulkEntry } from '@/entities/attendance/model/types'
+import { useAuth } from '@/app/providers/AuthProvider'
 import { useToast } from '@/shared/lib/toast'
 
-export function useAttendanceTable(group: Group) {
+const PAGE_SIZE = 10
+
+export function useAttendanceTable(groupId: string, date: string) {
+  const { token } = useAuth()
   const queryClient = useQueryClient()
   const toast       = useToast()
-  const today       = getLocalDateString()
 
   // ── server state ──────────────────────────────────────────────────────────
-  const { data: history, isLoading } = useQuery({
-    queryKey: ['attendance-history', group.id],
-    queryFn:  () => fetchGroupAttendanceHistory(group.id),
-    staleTime: 0,
+  const { data: session, isLoading, isError } = useQuery({
+    queryKey: ['attendance-session', groupId, date],
+    queryFn:  () => fetchAttendanceSession(groupId, date, token!),
+    enabled:  !!token && !!groupId && !!date,
   })
 
-  // ── local state for today's column ────────────────────────────────────────
-  const initializedRef = useRef(false)
+  // ── local editable statuses: enrollment → status ──────────────────────────
+  const [statuses, setStatuses] = useState<Record<string, AttendanceStatus>>({})
+  const [notes, setNotes]       = useState<Record<string, string>>({})
 
-  const defaultStatuses = (): Record<string, AttendanceStatus> =>
-    Object.fromEntries(group.students.map((s) => [s.id, 'present' as AttendanceStatus]))
-
-  const [todayStatuses, setTodayStatuses] = useState<Record<string, AttendanceStatus>>(defaultStatuses)
-
-  // Once history loads, seed today's statuses from any previously submitted data
+  // Seed local state from session data whenever it loads or date changes
   useEffect(() => {
-    if (history && !initializedRef.current) {
-      initializedRef.current = true
-      const seeded: Record<string, AttendanceStatus> = {}
-      for (const student of group.students) {
-        const fromHistory = history.records[student.id]?.[today]
-        seeded[student.id] = fromHistory ?? 'present'
-      }
-      setTodayStatuses(seeded)
+    if (!session) return
+    const s: Record<string, AttendanceStatus> = {}
+    const n: Record<string, string> = {}
+    for (const row of session.rows) {
+      s[row.enrollment] = row.status ?? 'present'
+      n[row.enrollment] = row.note  ?? ''
     }
-  }, [history, group.students, today])
+    setStatuses(s)
+    setNotes(n)
+  }, [session])
 
-  function setStudentStatus(studentId: string, status: AttendanceStatus) {
-    setTodayStatuses((prev) => ({ ...prev, [studentId]: status }))
+  function setStatus(enrollmentId: string, status: AttendanceStatus) {
+    setStatuses((prev) => ({ ...prev, [enrollmentId]: status }))
+  }
+
+  function setNote(enrollmentId: string, note: string) {
+    setNotes((prev) => ({ ...prev, [enrollmentId]: note }))
   }
 
   function markAll(status: AttendanceStatus) {
-    setTodayStatuses(Object.fromEntries(group.students.map((s) => [s.id, status])))
+    if (!session) return
+    setStatuses(Object.fromEntries(session.rows.map((r) => [r.enrollment, status])))
   }
 
-  // ── submit mutation ───────────────────────────────────────────────────────
+  // ── pagination ────────────────────────────────────────────────────────────
+  const [page, setPage] = useState(1)
+
+  // Reset to page 1 when date or group changes
+  useEffect(() => { setPage(1) }, [groupId, date])
+
+  const rows        = session?.rows ?? []
+  const totalPages  = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
+  const pagedRows   = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  // ── submit ────────────────────────────────────────────────────────────────
   const mutation = useMutation({
-    mutationFn: () =>
-      submitAttendance({
-        groupId: group.id,
-        date:    today,
-        entries: group.students.map((s) => ({
-          studentId: s.id,
-          status:    todayStatuses[s.id],
-        })),
-      }),
+    mutationFn: () => {
+      const entries: AttendanceBulkEntry[] = rows.map((r) => ({
+        enrollment: r.enrollment,
+        status:     statuses[r.enrollment] ?? 'present',
+        ...(notes[r.enrollment] ? { note: notes[r.enrollment] } : {}),
+      }))
+      return submitBulkAttendance({ group: groupId, date, entries }, token!)
+    },
     onSuccess: () => {
       toast.success('Davomat muvaffaqiyatli saqlandi!')
-      queryClient.invalidateQueries({ queryKey: ['attendance-history', group.id] })
+      queryClient.invalidateQueries({ queryKey: ['attendance-session', groupId, date] })
     },
     onError: () => {
       toast.error("Xatolik yuz berdi. Qayta urinib ko'ring.")
@@ -71,20 +79,26 @@ export function useAttendanceTable(group: Group) {
   })
 
   // ── derived stats ─────────────────────────────────────────────────────────
-  const presentCount = Object.values(todayStatuses).filter((s) => s === 'present').length
-  const absentCount  = group.students.length - presentCount
+  const presentCount = Object.values(statuses).filter((s) => s === 'present').length
+  const absentCount  = rows.length - presentCount
 
   return {
-    dates:         history?.dates ?? [],
-    historyRecords: history?.records ?? {},
-    todayStatuses,
-    today,
+    session,
     isLoading,
-    isSubmitting:  mutation.isPending,
-    setStudentStatus,
+    isError,
+    pagedRows,
+    statuses,
+    notes,
+    setStatus,
+    setNote,
     markAll,
-    submit:        mutation.mutate,
+    submit:       mutation.mutate,
+    isSubmitting: mutation.isPending,
     presentCount,
     absentCount,
+    totalRows:    rows.length,
+    page,
+    totalPages,
+    setPage,
   }
 }

@@ -1,29 +1,55 @@
 export type AttendanceStatus = 'present' | 'absent'
 
-export interface AttendanceEntry {
-  studentId: string
-  status:    AttendanceStatus
+// ─── Session API ──────────────────────────────────────────────────────────────
+
+export interface AttendanceSessionStudent {
+  _id:       string
+  firstName: string
+  lastName:  string
+  phone:     number
 }
 
-export interface AttendanceRecord {
-  id:       string
-  groupId:  string
-  date:     string  // ISO date "YYYY-MM-DD"
-  entries:  AttendanceEntry[]
+export interface AttendanceSessionRow {
+  enrollment:   string
+  student:      AttendanceSessionStudent
+  status:       AttendanceStatus | null
+  note:         string | null
+  attendanceId: string | null
+  markedAt:     string | null
 }
 
-export interface AttendanceSubmitPayload {
-  groupId: string
+export interface AttendanceSession {
+  group: {
+    _id:      string
+    name:     string
+    schedule: { days: string[]; time: string }
+  }
+  date:            string
+  weekday:         string
+  isValidSchedule: boolean
+  rows:            AttendanceSessionRow[]
+  code:            string
+  message:         string
+}
+
+// ─── Mark attendance API ──────────────────────────────────────────────────────
+
+export interface MarkAttendancePayload {
+  enrollmentId: string
+  date:         string
+  status:       AttendanceStatus
+}
+
+// ─── Bulk submit API (kept for compatibility) ─────────────────────────────────
+
+export interface AttendanceBulkEntry {
+  enrollment: string
+  status:     AttendanceStatus
+  note?:      string
+}
+
+export interface AttendanceBulkPayload {
+  group:   string
   date:    string
-  entries: AttendanceEntry[]
-}
-
-/**
- * dates:   ordered array of ISO date strings (e.g. last 20 days)
- * records: { [studentId]: { [isoDate]: AttendanceStatus | null } }
- *          null means no record exists (today not yet submitted)
- */
-export interface AttendanceHistory {
-  dates:   string[]
-  records: Record<string, Record<string, AttendanceStatus | null>>
+  entries: AttendanceBulkEntry[]
 }
