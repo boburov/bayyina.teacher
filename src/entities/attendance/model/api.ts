@@ -11,18 +11,27 @@ export async function fetchAttendanceSession(
   token: string,
 ): Promise<AttendanceSession> {
   return http.get<AttendanceSession>(
-    `attendance/session?groupId=${groupId}&date=${date}`,
+    `attendance/session?group=${groupId}&date=${date}`,
     token,
   )
 }
 
+/**
+ * Mark a single enrollment for a session.
+ * Internally uses POST /attendance/bulk with one entry (upsert by enrollment+date).
+ */
 export async function markAttendance(
+  groupId: string,
   enrollmentId: string,
   date: string,
   status: AttendanceStatus,
   token: string,
 ): Promise<unknown> {
-  return http.post<unknown>('attendance/mark', { enrollmentId, date, status }, token)
+  return http.post<unknown>(
+    'attendance/bulk',
+    { group: groupId, date, entries: [{ enrollment: enrollmentId, status }] },
+    token,
+  )
 }
 
 export async function submitBulkAttendance(

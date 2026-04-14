@@ -34,7 +34,7 @@ export interface Enrollment {
   updatedAt:       string
 }
 
-/** Response shape for GET /enrollments/{groupId} */
+/** Response shape for GET /enrollments?group=groupId */
 export interface EnrollmentsResponse {
   enrollments?: Enrollment[]
   enrollment?:  Enrollment

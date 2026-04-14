@@ -1,12 +1,12 @@
-import { useState }                     from 'react'
+import { useState, useEffect }           from 'react'
 import { useSearchParams }               from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ChevronLeft, ChevronRight,
   AlertTriangle, Users, RefreshCw,
 } from 'lucide-react'
-import { fetchAttendanceSession, markAttendance } from '@/entities/attendance/model/api'
-import type { AttendanceSession, AttendanceStatus } from '@/entities/attendance/model/types'
+import { fetchAttendanceSession, submitBulkAttendance } from '@/entities/attendance/model/api'
+import type { AttendanceStatus } from '@/entities/attendance/model/types'
 import { useAuth }           from '@/app/providers/AuthProvider'
 import { ROUTES, groupDetailsPath } from '@/shared/config/routes'
 import { DashboardLayout }   from '@/widgets/dashboard-layout/ui/DashboardLayout'
@@ -274,6 +274,10 @@ export function AttendancePage() {
   const [weekStart,    setWeekStart]    = useState(() => getMondayOf(today))
   const [page,         setPage]         = useState(1)
 
+  // ── Local draft statuses (not saved until "Saqlash" pressed) ─────────────
+  const [draftStatuses,  setDraftStatuses]  = useState<Record<string, AttendanceStatus | null>>({})
+  const [lastSessionKey, setLastSessionKey] = useState('')
+
   const queryKey = ['attendance', groupId, selectedDate]
 
   const { data: session, isLoading, isError, refetch } = useQuery({
@@ -282,33 +286,31 @@ export function AttendancePage() {
     enabled:  !!token && !!groupId,
   })
 
-  // ── Optimistic mark ───────────────────────────────────────────────────────
-  const { mutate: markStatus } = useMutation({
-    mutationFn: ({ enrollmentId, status }: { enrollmentId: string; status: AttendanceStatus }) =>
-      markAttendance(enrollmentId, selectedDate, status, token!),
+  // Sync draft from server when session loads for a new date/group
+  useEffect(() => {
+    const key = `${groupId}_${selectedDate}`
+    if (session && lastSessionKey !== key) {
+      const init: Record<string, AttendanceStatus | null> = {}
+      session.rows.forEach((r) => { init[r.enrollment] = r.status })
+      setDraftStatuses(init)
+      setLastSessionKey(key)
+    }
+  }, [session, groupId, selectedDate, lastSessionKey])
 
-    onMutate: async ({ enrollmentId, status }) => {
-      await queryClient.cancelQueries({ queryKey })
-      const snapshot = queryClient.getQueryData<AttendanceSession>(queryKey)
-      queryClient.setQueryData<AttendanceSession>(queryKey, (old) => {
-        if (!old) return old
-        return {
-          ...old,
-          rows: old.rows.map((row) =>
-            row.enrollment === enrollmentId ? { ...row, status } : row,
-          ),
-        }
-      })
-      return { snapshot }
+  // ── Save bulk mutation ────────────────────────────────────────────────────
+  const { mutate: saveBulk, isPending: isSaving } = useMutation({
+    mutationFn: () => {
+      const entries = (session?.rows ?? [])
+        .map((r) => ({ enrollment: r.enrollment, status: draftStatuses[r.enrollment] ?? r.status }))
+        .filter((e): e is { enrollment: string; status: AttendanceStatus } => e.status !== null)
+      return submitBulkAttendance({ group: groupId, date: selectedDate, entries }, token!)
     },
-
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.snapshot) queryClient.setQueryData(queryKey, ctx.snapshot)
-      toast.error("Xatolik yuz berdi. Qayta urinib ko'ring.")
-    },
-
-    onSettled: () => {
+    onSuccess: () => {
+      toast.success("Davomat saqlandi")
       queryClient.invalidateQueries({ queryKey })
+    },
+    onError: () => {
+      toast.error("Xatolik yuz berdi. Qayta urinib ko'ring.")
     },
   })
 
@@ -333,7 +335,8 @@ export function AttendancePage() {
   }
 
   // ── Derived data ──────────────────────────────────────────────────────────
-  const isToday      = selectedDate === today
+  // Editable only when selected date is today AND it's a valid schedule day
+  const isEditable   = selectedDate === today && (session?.isValidSchedule ?? false)
   const rows         = session?.rows ?? []
   const totalPages   = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
   const pagedRows    = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -410,9 +413,10 @@ export function AttendancePage() {
               </TableRow>
             ) : (
               pagedRows.map((row, idx) => {
-                const globalIdx = (page - 1) * PAGE_SIZE + idx + 1
-                const name      = `${row.student.firstName} ${row.student.lastName}`
-                const phone     = String(row.student.phone)
+                const globalIdx   = (page - 1) * PAGE_SIZE + idx + 1
+                const name        = `${row.student.firstName} ${row.student.lastName}`
+                const phone       = String(row.student.phone)
+                const draftStatus = draftStatuses[row.enrollment] ?? row.status
 
                 return (
                   <TableRow key={row.enrollment}>
@@ -434,13 +438,15 @@ export function AttendancePage() {
                     </TableCell>
 
                     <TableCell>
-                      {isToday ? (
+                      {isEditable ? (
                         <StatusToggle
-                          status={row.status}
-                          onChange={(s) => markStatus({ enrollmentId: row.enrollment, status: s })}
+                          status={draftStatus}
+                          onChange={(s) =>
+                            setDraftStatuses((prev) => ({ ...prev, [row.enrollment]: s }))
+                          }
                         />
                       ) : (
-                        <StatusBadge status={row.status} />
+                        <StatusBadge status={draftStatus} />
                       )}
                     </TableCell>
 
@@ -464,6 +470,22 @@ export function AttendancePage() {
               onPrev={() => setPage((p) => Math.max(1, p - 1))}
               onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
             />
+          </>
+        )}
+
+        {/* Save button — only shown when today is a valid schedule day */}
+        {isEditable && !isLoading && !isError && rows.length > 0 && (
+          <>
+            <Separator />
+            <div className="flex justify-end px-6 py-4">
+              <Button
+                onClick={() => saveBulk()}
+                disabled={isSaving}
+                className="min-w-[120px]"
+              >
+                {isSaving ? 'Saqlanmoqda…' : 'Saqlash'}
+              </Button>
+            </div>
           </>
         )}
       </Card>
