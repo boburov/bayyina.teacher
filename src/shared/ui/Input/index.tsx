@@ -41,8 +41,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               error
                 ? 'border-red-500 focus:border-red-600'
                 : 'border-gray-300 hover:border-gray-400',
-              leftIcon  && 'pl-10',
-              rightIcon && 'pr-10',
+              leftIcon ? 'pl-10' : "",
+              rightIcon ? 'pr-10' : "",
               className,
             )}
             {...props}
