@@ -1,10 +1,11 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import { ROUTES } from '@/shared/config/routes'
 import { useAuth } from '@/app/providers/AuthProvider'
-import { LoginPage }        from '@/pages/login/ui/LoginPage'
-import { GroupsPage }       from '@/pages/groups/ui/GroupsPage'
-import { GroupDetailsPage } from '@/pages/group-details/ui/GroupDetailsPage'
-import { AttendancePage }   from '@/pages/attendance/ui/AttendancePage'
+import { LoginPage }          from '@/pages/login/ui/LoginPage'
+import { GroupsPage }         from '@/pages/groups/ui/GroupsPage'
+import { GroupDetailsPage }   from '@/pages/group-details/ui/GroupDetailsPage'
+import { AttendancePage }     from '@/pages/attendance/ui/AttendancePage'
+import { NotificationsPage }  from '@/pages/notifications/ui/NotificationsPage'
 
 /** Redirects unauthenticated users to /login */
 function AuthGuard() {
@@ -34,9 +35,10 @@ export const router = createBrowserRouter([
   {
     element: <AuthGuard />,
     children: [
-      { path: ROUTES.GROUPS,       element: <GroupsPage /> },
+      { path: ROUTES.GROUPS,        element: <GroupsPage /> },
       { path: ROUTES.GROUP_DETAILS, element: <GroupDetailsPage /> },
-      { path: ROUTES.ATTENDANCE,   element: <AttendancePage /> },
+      { path: ROUTES.ATTENDANCE,    element: <AttendancePage /> },
+      { path: ROUTES.NOTIFICATIONS, element: <NotificationsPage /> },
     ],
   },
   {

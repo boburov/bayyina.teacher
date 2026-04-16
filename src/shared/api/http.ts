@@ -46,6 +46,13 @@ export const http = {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
   },
+  put<T>(path: string, body: unknown, token?: string) {
+    return request<T>(path, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
+  },
   get<T>(path: string, token?: string) {
     return request<T>(path, {
       method: 'GET',

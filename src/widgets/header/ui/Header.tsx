@@ -1,8 +1,6 @@
 import type { ReactNode } from 'react'
 import { ChevronLeft }    from 'lucide-react'
 import { useNavigate }    from 'react-router-dom'
-import { Button }         from '@/components/ui/button'
-import { Separator }      from '@/components/ui/separator'
 
 interface HeaderProps {
   title:      string
@@ -15,30 +13,27 @@ export function Header({ title, subtitle, backPath, action }: HeaderProps) {
   const navigate = useNavigate()
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 pb-4 border-b border-gray-200">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           {backPath && (
-            <Button
-              variant="outline"
-              size="icon"
+            <button
               onClick={() => navigate(backPath)}
               aria-label="Orqaga"
-              className="h-8 w-8 rounded-md shrink-0"
+              className="flex items-center justify-center w-7 h-7 border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors shrink-0"
             >
-              <ChevronLeft size={15} />
-            </Button>
+              <ChevronLeft size={14} />
+            </button>
           )}
           <div>
-            <h1 className="text-lg font-semibold text-gray-900 leading-tight">{title}</h1>
+            <h1 className="text-base font-semibold text-gray-900 leading-tight">{title}</h1>
             {subtitle && (
-              <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
             )}
           </div>
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>
-      <Separator className="mt-4" />
     </div>
   )
 }

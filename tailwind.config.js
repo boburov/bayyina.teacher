@@ -30,13 +30,12 @@ export default {
         'card-hover': 'none',
       },
       borderRadius: {
-        // tighten radius scale — keep existing names but cap values
-        DEFAULT: '6px',
-        sm:  '4px',
-        md:  '6px',
-        lg:  '8px',
-        xl:  '8px',
-        '2xl': '10px',
+        DEFAULT: '2px',
+        sm:  '2px',
+        md:  '2px',
+        lg:  '2px',
+        xl:  '4px',
+        '2xl': '4px',
         full: '9999px',
       },
       keyframes: {

@@ -3,13 +3,6 @@ import { GraduationCap } from 'lucide-react'
 import { LoginForm } from '@/features/auth/login/ui/LoginForm'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { ROUTES } from '@/shared/config/routes'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 
 export function LoginPage() {
   const { isAuthenticated } = useAuth()
@@ -19,35 +12,27 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface px-4 py-12">
-      <div className="w-full max-w-sm flex flex-col items-center gap-6">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12">
+      <div className="w-full max-w-sm">
 
-        {/* Brand mark */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-brown-800">
-            <GraduationCap size={22} className="text-white" />
+        {/* Brand */}
+        <div className="flex flex-col items-center gap-3 mb-8">
+          <div className="flex items-center justify-center w-10 h-10 bg-brown-800">
+            <GraduationCap size={20} className="text-white" />
           </div>
           <div className="text-center">
-            <h1 className="text-xl font-semibold tracking-tight text-gray-900">Bayyina</h1>
-            <p className="text-sm text-gray-500 mt-0.5">O'qituvchi paneli</p>
+            <h1 className="text-lg font-semibold text-gray-900">Bayyina</h1>
+            <p className="text-sm text-gray-400 mt-0.5">O'qituvchi paneli</p>
           </div>
         </div>
 
-        {/* Login card */}
-        <Card className="w-full">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">Tizimga kirish</CardTitle>
-            <CardDescription>
-              Telefon raqam va parolni kiriting
-            </CardDescription>
-          </CardHeader>
+        {/* Login form */}
+        <div className="border border-gray-200 bg-white px-6 py-7">
+          <h2 className="text-sm font-semibold text-gray-700 mb-5">Tizimga kirish</h2>
+          <LoginForm />
+        </div>
 
-          <CardContent>
-            <LoginForm />
-          </CardContent>
-        </Card>
-
-        <p className="text-center text-xs text-gray-400">
+        <p className="text-center text-xs text-gray-400 mt-5">
           © {new Date().getFullYear()} Bayyina Ta'lim Markazi
         </p>
       </div>

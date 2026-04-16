@@ -88,7 +88,7 @@ function WeekNavigator({
   const days  = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
   return (
-    <div className="flex items-center gap-2 mb-4 bg-white border border-gray-200 rounded-lg p-2">
+    <div className="flex items-center gap-2 mb-4 bg-white border border-gray-200 p-2">
       <Button
         variant="ghost"
         size="sm"
@@ -110,13 +110,13 @@ function WeekNavigator({
               type="button"
               onClick={() => onDaySelect(date)}
               className={cn(
-                'flex flex-col items-center gap-0.5 rounded-md px-1 py-2 flex-1 min-w-0 transition-colors',
+                'flex flex-col items-center gap-0.5 px-1 py-2 flex-1 min-w-0 transition-colors',
                 isSelected
-                  ? 'bg-gray-900 text-white'
+                  ? 'bg-brown-800 text-white'
                   : isToday
                     ? 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                    : 'hover:bg-gray-50 text-gray-700',
-                !inSchedule && !isSelected && 'opacity-35',
+                    : 'hover:bg-gray-50 text-gray-600',
+                !inSchedule && !isSelected && 'opacity-40',
               )}
             >
               <span className="text-[10px] font-medium uppercase tracking-wide">
@@ -167,7 +167,7 @@ interface StatusToggleProps {
 
 function StatusToggle({ status, onChange }: StatusToggleProps) {
   return (
-    <div className="inline-flex rounded-md border border-gray-200 overflow-hidden">
+    <div className="inline-flex border border-gray-200 overflow-hidden">
       <button
         type="button"
         onClick={() => onChange('present')}
@@ -363,7 +363,7 @@ export function AttendancePage() {
 
       {/* Off-schedule warning */}
       {!isLoading && session?.isValidSchedule === false && (
-        <div className="flex items-center gap-2.5 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-4">
+        <div className="flex items-center gap-2.5 text-sm text-amber-700 bg-amber-50 border border-amber-200 px-4 py-3 mb-4">
           <AlertTriangle size={15} className="shrink-0" />
           Bu kun guruh dars jadvali bo'yicha dars kuni emas.
         </div>
