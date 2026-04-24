@@ -22,15 +22,19 @@ const typeLabel: Record<string, string> = {
 }
 
 const statusCls: Record<string, string> = {
-  open:    'bg-amber-50 text-amber-700 border border-amber-200',
-  closed:  'bg-green-50 text-green-700 border border-green-200',
-  pending: 'bg-gray-100 text-gray-500 border border-gray-200',
+  open:        'bg-amber-50 text-amber-700 border border-amber-200',
+  in_progress: 'bg-blue-50 text-blue-700 border border-blue-200',
+  resolved:    'bg-green-50 text-green-700 border border-green-200',
+  closed:      'bg-gray-100 text-gray-500 border border-gray-200',
+  pending:     'bg-gray-100 text-gray-500 border border-gray-200',
 }
 
 const statusText: Record<string, string> = {
-  open:    'Ochiq',
-  closed:  'Yopiq',
-  pending: 'Kutilmoqda',
+  open:        'Ochiq',
+  in_progress: 'Jarayonda',
+  resolved:    'Hal qilindi',
+  closed:      'Yopiq',
+  pending:     'Kutilmoqda',
 }
 
 const PAGE_LIMIT = 15

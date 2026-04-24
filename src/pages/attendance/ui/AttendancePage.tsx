@@ -3,10 +3,12 @@ import { useSearchParams }               from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ChevronLeft, ChevronRight,
-  AlertTriangle, Users, RefreshCw,
+  AlertTriangle, Users, RefreshCw, Clock,
 } from 'lucide-react'
 import { fetchAttendanceSession, submitBulkAttendance } from '@/entities/attendance/model/api'
 import type { AttendanceStatus } from '@/entities/attendance/model/types'
+import { fetchGroups } from '@/entities/group/model/api'
+import type { Group } from '@/entities/group/model/types'
 import { useAuth }           from '@/app/providers/AuthProvider'
 import { ROUTES, groupDetailsPath } from '@/shared/config/routes'
 import { DashboardLayout }   from '@/widgets/dashboard-layout/ui/DashboardLayout'
@@ -259,6 +261,71 @@ function Pagination({ page, totalPages, totalRows, onPrev, onNext }: PaginationP
   )
 }
 
+// ─── Group picker ─────────────────────────────────────────────────────────────
+
+interface GroupPickerProps {
+  token: string
+  onSelect: (group: Group) => void
+}
+
+function GroupPicker({ token, onSelect }: GroupPickerProps) {
+  const { data: groups, isLoading, isError, refetch } = useQuery({
+    queryKey: ['groups'],
+    queryFn:  () => fetchGroups(token),
+  })
+
+  return (
+    <DashboardLayout>
+      <Header title="Davomat" subtitle="Guruhni tanlang" />
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-lg" />
+          ))}
+        </div>
+      ) : isError ? (
+        <div className="flex flex-col items-center gap-3 py-16 text-gray-500">
+          <p className="text-sm font-medium">Guruhlar yuklanmadi</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
+            <RefreshCw size={13} />
+            Qayta yuklash
+          </Button>
+        </div>
+      ) : !groups?.length ? (
+        <div className="flex flex-col items-center gap-2 py-16 text-gray-400">
+          <Users size={24} />
+          <p className="text-sm">Guruhlar topilmadi</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {groups.map((group) => (
+            <button
+              key={group.id}
+              type="button"
+              onClick={() => onSelect(group)}
+              className="flex flex-col gap-1.5 p-4 bg-white border border-gray-200 rounded-lg text-left hover:border-brown-800 hover:shadow-sm transition-all"
+            >
+              <span className="font-semibold text-gray-900 text-sm">{group.name}</span>
+              {group.schedule?.days?.length > 0 && (
+                <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <Clock size={11} />
+                  {group.schedule.days.join(', ')} · {group.schedule.time}
+                </span>
+              )}
+              {group.teacher && (
+                <span className="text-xs text-gray-400">
+                  {group.teacher.firstName} {group.teacher.lastName}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </DashboardLayout>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function AttendancePage() {
@@ -267,16 +334,16 @@ export function AttendancePage() {
   const queryClient     = useQueryClient()
   const toast           = useToast()
 
-  const groupId = searchParams.get('groupId') ?? ''
-  const today   = getLocalDateString()
-
-  const [selectedDate, setSelectedDate] = useState(today)
-  const [weekStart,    setWeekStart]    = useState(() => getMondayOf(today))
-  const [page,         setPage]         = useState(1)
-
-  // ── Local draft statuses (not saved until "Saqlash" pressed) ─────────────
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
+  const [selectedDate, setSelectedDate]   = useState(getLocalDateString)
+  const [weekStart,    setWeekStart]      = useState(() => getMondayOf(getLocalDateString()))
+  const [page,         setPage]           = useState(1)
   const [draftStatuses,  setDraftStatuses]  = useState<Record<string, AttendanceStatus | null>>({})
   const [lastSessionKey, setLastSessionKey] = useState('')
+
+  const paramGroupId = searchParams.get('groupId') ?? ''
+  const groupId      = selectedGroup?.id ?? paramGroupId
+  const today        = getLocalDateString()
 
   const queryKey = ['attendance', groupId, selectedDate]
 
@@ -314,6 +381,11 @@ export function AttendancePage() {
     },
   })
 
+  // ── Group picker — shown when no groupId resolved ─────────────────────────
+  if (!groupId && token) {
+    return <GroupPicker token={token} onSelect={(g) => setSelectedGroup(g)} />
+  }
+
   // ── Week navigation ───────────────────────────────────────────────────────
   function prevWeek() {
     const newStart = addDays(weekStart, -7)
@@ -341,14 +413,17 @@ export function AttendancePage() {
   const totalPages   = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
   const pagedRows    = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const scheduleDays = session?.group.schedule.days ?? []
-  const backPath     = groupId ? groupDetailsPath(groupId) : ROUTES.GROUPS
+  const backPath     = selectedGroup
+    ? undefined                      // came from in-page picker — use onBack
+    : groupId ? groupDetailsPath(groupId) : ROUTES.GROUPS
 
   return (
     <DashboardLayout>
       <Header
-        title={session?.group.name ?? 'Davomat'}
+        title={session?.group.name ?? selectedGroup?.name ?? 'Davomat'}
         subtitle="Davomat jadvali"
         backPath={backPath}
+        onBack={selectedGroup ? () => setSelectedGroup(null) : undefined}
       />
 
       {/* Week navigator */}

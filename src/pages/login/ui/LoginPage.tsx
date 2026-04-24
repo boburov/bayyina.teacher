@@ -1,5 +1,4 @@
 import { Navigate } from 'react-router-dom'
-import { GraduationCap } from 'lucide-react'
 import { LoginForm } from '@/features/auth/login/ui/LoginForm'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { ROUTES } from '@/shared/config/routes'
@@ -17,9 +16,7 @@ export function LoginPage() {
 
         {/* Brand */}
         <div className="flex flex-col items-center gap-3 mb-8">
-          <div className="flex items-center justify-center w-10 h-10 bg-brown-800">
-            <GraduationCap size={20} className="text-white" />
-          </div>
+          <img src="/favicon.png" alt="Bayyina" className="w-12 h-12 object-contain" />
           <div className="text-center">
             <h1 className="text-lg font-semibold text-gray-900">Bayyina</h1>
             <p className="text-sm text-gray-400 mt-0.5">O'qituvchi paneli</p>

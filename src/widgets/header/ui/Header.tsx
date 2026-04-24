@@ -6,19 +6,22 @@ interface HeaderProps {
   title:      string
   subtitle?:  string
   backPath?:  string
+  onBack?:    () => void
   action?:    ReactNode
 }
 
-export function Header({ title, subtitle, backPath, action }: HeaderProps) {
+export function Header({ title, subtitle, backPath, onBack, action }: HeaderProps) {
   const navigate = useNavigate()
+
+  const handleBack = onBack ?? (backPath ? () => navigate(backPath) : undefined)
 
   return (
     <div className="mb-6 pb-4 border-b border-gray-200">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          {backPath && (
+          {handleBack && (
             <button
-              onClick={() => navigate(backPath)}
+              onClick={handleBack}
               aria-label="Orqaga"
               className="flex items-center justify-center w-7 h-7 border border-gray-300 text-gray-500 hover:bg-gray-50 transition-colors shrink-0"
             >

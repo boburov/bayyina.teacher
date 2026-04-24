@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://156.67.29.62:4000/api'
+export const BASE_URL = 'https://api.bayyina.org.uz/api'
 
 export class ApiError extends Error {
   constructor(
