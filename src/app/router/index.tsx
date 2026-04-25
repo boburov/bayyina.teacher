@@ -6,6 +6,7 @@ import { GroupsPage }         from '@/pages/groups/ui/GroupsPage'
 import { GroupDetailsPage }   from '@/pages/group-details/ui/GroupDetailsPage'
 import { AttendancePage }     from '@/pages/attendance/ui/AttendancePage'
 import { NotificationsPage }  from '@/pages/notifications/ui/NotificationsPage'
+import { SalariesPage }       from '@/pages/salaries/ui/SalariesPage'
 
 /** Redirects unauthenticated users to /login */
 function AuthGuard() {
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.GROUP_DETAILS, element: <GroupDetailsPage /> },
       { path: ROUTES.ATTENDANCE,    element: <AttendancePage /> },
       { path: ROUTES.NOTIFICATIONS, element: <NotificationsPage /> },
+      { path: ROUTES.SALARIES,      element: <SalariesPage /> },
     ],
   },
   {

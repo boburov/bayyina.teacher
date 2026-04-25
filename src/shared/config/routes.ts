@@ -4,6 +4,7 @@ export const ROUTES = {
   GROUP_DETAILS: '/groups/:id',
   ATTENDANCE:    '/attendance',
   NOTIFICATIONS: '/notifications',
+  SALARIES:      '/salaries',
 } as const
 
 export function groupDetailsPath(id: string | number) {
