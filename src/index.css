@@ -1,6 +1,47 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-brown-50: #fdf8f6;
+  --color-brown-100: #f2e8e5;
+  --color-brown-200: #eaddd7;
+  --color-brown-300: #e0cec7;
+  --color-brown-400: #d2bab0;
+  --color-brown-500: #bfa094;
+  --color-brown-600: #a18072;
+  --color-brown-700: #977669;
+  --color-brown-800: #65443c;
+  --color-brown-900: #271816;
+
+  --color-border: #E5E7EB;
+  --color-surface: #F9FAFB;
+  --color-cream: #F9FAFB;
+
+  --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-soft: none;
+  --shadow-card: none;
+  --shadow-card-hover: none;
+
+  --radius-DEFAULT: 2px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
+  --radius-full: 9999px;
+
+  --animate-slideInRight: slideInRight 0.2s ease-out;
+  --animate-fadeIn: fadeIn 0.15s ease-out;
+}
+
+@keyframes slideInRight {
+  0%   { transform: translateX(calc(100% + 1.25rem)); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
 
 @layer base {
   *, *::before, *::after {
