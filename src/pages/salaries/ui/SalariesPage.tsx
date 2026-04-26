@@ -97,6 +97,8 @@ function SalaryDetail({ salary, onClose }: { salary: Salary; onClose: () => void
                   <p className="text-xs text-gray-400 mt-0.5">
                     {g.salaryType === 'percentage'
                       ? `${g.salaryValue}% · `
+                      : g.salaryType === 'fixed'
+                      ? `Belgilangan · `
                       : `${fmt(g.salaryValue)} / talaba · `}
                     {g.paidStudentsCount}/{g.studentCount} talaba
                   </p>
