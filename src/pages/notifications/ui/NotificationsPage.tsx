@@ -229,7 +229,7 @@ export function NotificationsPage() {
           {!isLoading && !isError && notifications.length === 0 && (
             <div className="border border-gray-200 bg-white flex flex-col items-center py-16 gap-2 text-gray-400">
               <Bell size={28} strokeWidth={1.5} className="opacity-30" />
-              <p className="text-sm">Xabarnomalar yo'q</p>
+              <p className="text-sm">Murojatlar mavjud emas</p>
             </div>
           )}
 

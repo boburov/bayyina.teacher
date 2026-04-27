@@ -25,7 +25,7 @@ export function LoginPage() {
 
         {/* Login form */}
         <div className="border border-gray-200 bg-white px-6 py-7">
-          <h2 className="text-sm font-semibold text-gray-700 mb-5">Tizimga kirish</h2>
+          <h2 className=" font-extrabold text-gray-700 mb-5 text-2xl">Tizimga kirish</h2>
           <LoginForm />
         </div>
 
