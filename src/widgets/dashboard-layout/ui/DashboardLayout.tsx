@@ -9,9 +9,9 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { isAuthenticated } = useAuth()
+  const { token } = useAuth()
 
-  if (!isAuthenticated) {
+  if (!token) {
     return <Navigate to={ROUTES.LOGIN} replace />
   }
 
