@@ -1,9 +1,8 @@
-import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Phone, CalendarCheck, Users, Clock, Loader2, ArrowRightLeft } from 'lucide-react'
-import { fetchGroupById, fetchGroups } from '@/entities/group/model/api'
-import { fetchEnrollmentsByGroup, transferEnrollment } from '@/entities/enrollment/model/api'
+import { useQuery } from '@tanstack/react-query'
+import { Phone, CalendarCheck, Users, Clock, Loader2 } from 'lucide-react'
+import { fetchGroupById } from '@/entities/group/model/api'
+import { fetchEnrollmentsByGroup } from '@/entities/enrollment/model/api'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { ROUTES } from '@/shared/config/routes'
 import { DashboardLayout } from '@/widgets/dashboard-layout/ui/DashboardLayout'
@@ -27,22 +26,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import type { Enrollment } from '@/entities/enrollment/model/types'
 
 // ─── Info stat card ────────────────────────────────────────────────────────────
 
@@ -76,109 +59,9 @@ function TableSkeletonRows() {
           </TableCell>
           <TableCell className="hidden sm:table-cell"><Skeleton className="w-36 h-4" /></TableCell>
           <TableCell className="hidden sm:table-cell"><Skeleton className="w-14 h-5 rounded" /></TableCell>
-          <TableCell><Skeleton className="w-8 h-8 rounded" /></TableCell>
         </TableRow>
       ))}
     </>
-  )
-}
-
-// ─── Transfer Modal ────────────────────────────────────────────────────────────
-
-interface TransferModalProps {
-  open:         boolean
-  enrollment:   Enrollment | null
-  currentGroup: string
-  token:        string
-  onClose:      () => void
-  onSuccess:    () => void
-}
-
-function TransferModal({ open, enrollment, currentGroup, token, onClose, onSuccess }: TransferModalProps) {
-  const [targetGroupId, setTargetGroupId] = useState('')
-
-  const { data: allGroups = [] } = useQuery({
-    queryKey: ['all-groups'],
-    queryFn: () => fetchGroups(token),
-    enabled: open,
-  })
-
-  const otherGroups = allGroups.filter(g => g.id !== currentGroup)
-
-  const mutation = useMutation({
-    mutationFn: () => transferEnrollment(
-      enrollment!._id,
-      targetGroupId,
-      token,
-      enrollment!.student._id,
-      {
-        discount:       enrollment!.discount,
-        discountReason: (enrollment as any).discountReason,
-        paymentDay:     enrollment!.paymentDay,
-        debt:           enrollment!.debt,
-        balance:        enrollment!.balance,
-      },
-    ),
-    onSuccess: () => {
-      onSuccess()
-      onClose()
-      setTargetGroupId('')
-    },
-  })
-
-  if (!enrollment) return null
-  const studentName = `${enrollment.student.firstName} ${enrollment.student.lastName}`
-
-  return (
-    <Dialog open={open} onOpenChange={v => { if (!v) { onClose(); setTargetGroupId('') } }}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>O'quvchini guruhga o'tkazish</DialogTitle>
-          <DialogDescription>
-            <span className="font-medium text-gray-900">{studentName}</span> ni boshqa guruhga o'tkazmoqchisiz.
-            Joriy guruh holati "tashlab ketildi" ga o'zgaradi.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="py-2">
-          <p className="text-sm text-gray-600 mb-2">Yangi guruhni tanlang:</p>
-          <Select value={targetGroupId} onValueChange={setTargetGroupId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Guruh tanlang..." />
-            </SelectTrigger>
-            <SelectContent>
-              {otherGroups.map(g => (
-                <SelectItem key={g.id} value={g.id}>
-                  {g.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {mutation.isError && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-            {(mutation.error as Error)?.message || 'Xatolik yuz berdi'}
-          </p>
-        )}
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => { onClose(); setTargetGroupId('') }}>
-            Bekor qilish
-          </Button>
-          <Button
-            onClick={() => mutation.mutate()}
-            disabled={!targetGroupId || mutation.isPending}
-          >
-            {mutation.isPending ? (
-              <><Loader2 size={14} className="animate-spin mr-1" /> O'tkazilmoqda...</>
-            ) : (
-              <><ArrowRightLeft size={14} className="mr-1" /> O'tkazish</>
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   )
 }
 
@@ -188,9 +71,6 @@ export function GroupDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { token } = useAuth()
-  const queryClient = useQueryClient()
-
-  const [transferTarget, setTransferTarget] = useState<Enrollment | null>(null)
 
   const { data: group, isLoading: groupLoading, isError: groupError } = useQuery({
     queryKey: ['groups', id],
@@ -212,10 +92,6 @@ export function GroupDetailsPage() {
 
   function goToAttendance() {
     navigate(`${ROUTES.ATTENDANCE}?groupId=${id}`)
-  }
-
-  function handleTransferSuccess() {
-    queryClient.invalidateQueries({ queryKey: ['enrollments', id] })
   }
 
   if (groupLoading) {
@@ -298,7 +174,6 @@ export function GroupDetailsPage() {
               <TableHead>Ism Familiya</TableHead>
               <TableHead className="hidden sm:table-cell">Telefon</TableHead>
               <TableHead className="hidden sm:table-cell">Holat</TableHead>
-              <TableHead className="w-16 text-right pr-4">Amal</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -306,13 +181,13 @@ export function GroupDetailsPage() {
               <TableSkeletonRows />
             ) : enrollmentsError ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-sm text-gray-500 py-8">
+                <TableCell colSpan={4} className="text-center text-sm text-gray-500 py-8">
                   O'quvchilar yuklanmadi
                 </TableCell>
               </TableRow>
             ) : enrollments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-sm text-gray-500 py-8">
+                <TableCell colSpan={4} className="text-center text-sm text-gray-500 py-8">
                   Hali o'quvchi yo'q
                 </TableCell>
               </TableRow>
@@ -346,18 +221,6 @@ export function GroupDetailsPage() {
                         {enrollment.status === 'active' ? 'Faol' : enrollment.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right pr-4">
-                      {enrollment.status === 'active' && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Boshqa guruhga o'tkazish"
-                          onClick={() => setTransferTarget(enrollment)}
-                        >
-                          <ArrowRightLeft size={14} />
-                        </Button>
-                      )}
-                    </TableCell>
                   </TableRow>
                 )
               })
@@ -375,15 +238,6 @@ export function GroupDetailsPage() {
         </div>
       </Card>
 
-      {/* Transfer modal */}
-      <TransferModal
-        open={!!transferTarget}
-        enrollment={transferTarget}
-        currentGroup={id!}
-        token={token!}
-        onClose={() => setTransferTarget(null)}
-        onSuccess={handleTransferSuccess}
-      />
     </DashboardLayout>
   )
 }
