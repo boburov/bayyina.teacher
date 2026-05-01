@@ -1,4 +1,6 @@
-export const BASE_URL = import.meta.env.VITE_API_URL || 'https://api.bayyina.org.uz/api'
+const BASE_URL   = import.meta.env.VITE_API_URL || 'https://api.bayyina.org.uz/api'
+const TOKEN_KEY  = 'bayyina_token'
+const USER_KEY   = 'bayyina_user'
 
 export class ApiError extends Error {
   constructor(
@@ -10,28 +12,32 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(
-  path: string,
-  init: RequestInit = {},
-): Promise<T> {
-  const url = `${BASE_URL}/${path}`
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = localStorage.getItem(TOKEN_KEY)
+  const url   = `${BASE_URL}/${path}`
 
   const res = await fetch(url, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init.headers ?? {}),
     },
   })
+
+  if (res.status === 401) {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(USER_KEY)
+    window.location.href = '/login'
+    throw new ApiError(401, 'Unauthorized')
+  }
 
   if (!res.ok) {
     let message = `HTTP ${res.status}`
     try {
       const body = await res.json()
       message = body?.message ?? message
-    } catch {
-      // ignore parse error
-    }
+    } catch { /* ignore */ }
     throw new ApiError(res.status, message)
   }
 
@@ -39,24 +45,19 @@ async function request<T>(
 }
 
 export const http = {
-  post<T>(path: string, body: unknown, token?: string) {
-    return request<T>(path, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    })
+  get<T>(path: string) {
+    return request<T>(path, { method: 'GET' })
   },
-  put<T>(path: string, body: unknown, token?: string) {
-    return request<T>(path, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    })
+  post<T>(path: string, body: unknown) {
+    return request<T>(path, { method: 'POST', body: JSON.stringify(body) })
   },
-  get<T>(path: string, token?: string) {
-    return request<T>(path, {
-      method: 'GET',
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    })
+  put<T>(path: string, body: unknown) {
+    return request<T>(path, { method: 'PUT', body: JSON.stringify(body) })
+  },
+  patch<T>(path: string, body: unknown) {
+    return request<T>(path, { method: 'PATCH', body: JSON.stringify(body) })
+  },
+  delete<T>(path: string) {
+    return request<T>(path, { method: 'DELETE' })
   },
 }

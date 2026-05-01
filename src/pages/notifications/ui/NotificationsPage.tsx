@@ -71,17 +71,16 @@ function fmtTime(iso: string): string {
 
 interface DetailProps {
   notification: Notification
-  token:        string
   onClose:      () => void
 }
 
-function DetailPanel({ notification: n, token, onClose }: DetailProps) {
+function DetailPanel({ notification: n, onClose }: DetailProps) {
   const [text, setText]   = useState('')
   const toast             = useToast()
   const queryClient       = useQueryClient()
 
   const { mutate: sendFeedback, isPending } = useMutation({
-    mutationFn: () => postFeedback(n._id, { message: text.trim() }, token),
+    mutationFn: () => postFeedback(n._id, { message: text.trim() }),
     onSuccess: () => {
       toast.success('Javob yuborildi')
       setText('')
@@ -186,7 +185,7 @@ export function NotificationsPage() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['teacher-notifications', page],
-    queryFn:  () => fetchNotifications(token!, { page, limit: PAGE_LIMIT }),
+    queryFn:  () => fetchNotifications({ page, limit: PAGE_LIMIT }),
     enabled:  !!token,
     placeholderData: keepPreviousData,
   })
@@ -304,7 +303,6 @@ export function NotificationsPage() {
           <div className="hidden lg:block flex-1 min-w-0 sticky top-6" style={{ maxHeight: 'calc(100vh - 10rem)' }}>
             <DetailPanel
               notification={selected}
-              token={token!}
               onClose={() => setSelected(null)}
             />
           </div>

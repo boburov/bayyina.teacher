@@ -164,7 +164,7 @@ export function SalariesPage() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['salaries', month, page],
-    queryFn:  () => fetchSalaries(token!, { month, page, limit: 20 }),
+    queryFn:  () => fetchSalaries({ month, page, limit: 20 }),
     enabled:  !!token,
   })
 

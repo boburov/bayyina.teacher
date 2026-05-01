@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { loginApi, fetchProfile } from '@/entities/user/model/api'
 import { ApiError } from '@/shared/api/http'
+import { setStoredToken, clearStoredAuth } from '@/entities/user/model/auth-store'
 import { ROUTES } from '@/shared/config/routes'
 
 interface LoginFormValues {
@@ -23,26 +24,17 @@ function digitsOnly(value: string): string {
 
 /**
  * Format UZ phone progressively as user types.
- * Input: raw string with any chars. Output: +998 XX XXX XX XX
+ * Output: +998 (90) 123-45-67
  */
 export function formatPhone(raw: string): string {
-  const digits = digitsOnly(raw)
-  const local  = digits.startsWith('998') ? digits.slice(3) : digits
+  const d = digitsOnly(raw)
+  const n = (d.startsWith('998') ? d.slice(3) : d.startsWith('0') ? d.slice(1) : d).slice(0, 9)
 
-  let result = '+998'
-  if (local.length === 0) return result
-
-  result += ' ' + local.slice(0, 2)
-  if (local.length <= 2) return result
-
-  result += ' ' + local.slice(2, 5)
-  if (local.length <= 5) return result
-
-  result += ' ' + local.slice(5, 7)
-  if (local.length <= 7) return result
-
-  result += ' ' + local.slice(7, 9)
-  return result
+  if (n.length === 0) return ''
+  if (n.length <= 2) return `+998 (${n}`
+  if (n.length <= 5) return `+998 (${n.slice(0, 2)}) ${n.slice(2)}`
+  if (n.length <= 7) return `+998 (${n.slice(0, 2)}) ${n.slice(2, 5)}-${n.slice(5)}`
+  return `+998 (${n.slice(0, 2)}) ${n.slice(2, 5)}-${n.slice(5, 7)}-${n.slice(7)}`
 }
 
 function isPhoneComplete(phone: string): boolean {
@@ -98,10 +90,19 @@ export function useLogin() {
       // 1. Login → token
       const token = await loginApi(phoneNumber, values.password)
 
-      // 2. Fetch profile with fresh token
-      const user = await fetchProfile(token)
+      // 2. Store token so http client can inject it for the profile request
+      setStoredToken(token)
 
-      // 3. Persist & navigate
+      // 3. Fetch profile
+      let user
+      try {
+        user = await fetchProfile()
+      } catch (profileErr) {
+        clearStoredAuth()
+        throw profileErr
+      }
+
+      // 4. Persist & navigate
       login(user, token)
       navigate(ROUTES.GROUPS, { replace: true })
     } catch (err) {

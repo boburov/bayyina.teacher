@@ -18,10 +18,9 @@ function mapApiGroup(g: ApiGroup): Group {
   }
 }
 
-export async function fetchGroups(token: string): Promise<Group[]> {
-  const res = await http.get<GroupsResponse | ApiGroup[]>('groups', token)
+export async function fetchGroups(): Promise<Group[]> {
+  const res = await http.get<GroupsResponse | ApiGroup[]>('groups')
 
-  // API may return { groups: [...] } wrapper or a bare array
   if (Array.isArray(res)) {
     return res.map(mapApiGroup)
   }
@@ -32,10 +31,9 @@ export async function fetchGroups(token: string): Promise<Group[]> {
   return list.map(mapApiGroup)
 }
 
-export async function fetchGroupById(id: string, token: string): Promise<Group | null> {
-  const res = await http.get<GroupDetailResponse | ApiGroup>(`groups/${id}`, token)
+export async function fetchGroupById(id: string): Promise<Group | null> {
+  const res = await http.get<GroupDetailResponse | ApiGroup>(`groups/${id}`)
 
-  // API may return { group: {...} } wrapper or the group object directly
   const raw = (res as GroupDetailResponse).group ?? (res as ApiGroup)
   if (!raw?._id) {
     throw new Error(`Unexpected /groups/${id} response shape: ${JSON.stringify(res)}`)

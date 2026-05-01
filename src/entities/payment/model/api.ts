@@ -2,11 +2,11 @@ import { http } from '@/shared/api/http'
 import type { PaymentsResponse } from './types'
 
 export interface FetchPaymentsParams {
-  group?:  string
+  group?:   string
   student?: string
-  status?: string
-  page?:   number
-  limit?:  number
+  status?:  string
+  page?:    number
+  limit?:   number
 }
 
 function buildQuery(params: FetchPaymentsParams): string {
@@ -21,8 +21,7 @@ function buildQuery(params: FetchPaymentsParams): string {
 }
 
 export async function fetchPayments(
-  token: string,
   params: FetchPaymentsParams = {},
 ): Promise<PaymentsResponse> {
-  return http.get<PaymentsResponse>(`payments${buildQuery(params)}`, token)
+  return http.get<PaymentsResponse>(`payments${buildQuery(params)}`)
 }

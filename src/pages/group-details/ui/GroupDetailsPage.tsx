@@ -74,7 +74,7 @@ export function GroupDetailsPage() {
 
   const { data: group, isLoading: groupLoading, isError: groupError } = useQuery({
     queryKey: ['groups', id],
-    queryFn: () => fetchGroupById(id!, token!),
+    queryFn: () => fetchGroupById(id!),
     enabled: !!id && !!token,
   })
 
@@ -84,7 +84,7 @@ export function GroupDetailsPage() {
     isError: enrollmentsError,
   } = useQuery({
     queryKey: ['enrollments', id],
-    queryFn: () => fetchEnrollmentsByGroup(id!, token!),
+    queryFn: () => fetchEnrollmentsByGroup(id!),
     enabled: !!id && !!token,
   })
 

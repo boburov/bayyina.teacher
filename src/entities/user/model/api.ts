@@ -1,14 +1,11 @@
 import { http } from '@/shared/api/http'
 import type { User } from './types'
 
-// ─── Request / response shapes ────────────────────────────────────────────────
-
 interface LoginPayload {
   phone:    number
   password: string
 }
 
-/** Flexible — handle both { token } and { accessToken } */
 interface LoginResponse {
   token?:       string
   accessToken?: string
@@ -35,8 +32,6 @@ interface ProfileResponse {
   message: string
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function mapApiUser(u: ApiUser): User {
   return {
     id:        u._id,
@@ -52,9 +47,6 @@ function mapApiUser(u: ApiUser): User {
   }
 }
 
-// ─── API calls ────────────────────────────────────────────────────────────────
-
-/** POST /auth/login — returns JWT token string */
 export async function loginApi(phone: number, password: string): Promise<string> {
   const payload: LoginPayload = { phone, password }
   const res = await http.post<LoginResponse>('auth/login', payload)
@@ -63,8 +55,7 @@ export async function loginApi(phone: number, password: string): Promise<string>
   return token
 }
 
-/** GET /auth/profile — returns mapped User */
-export async function fetchProfile(token: string): Promise<User> {
-  const res = await http.get<ProfileResponse>('auth/profile', token)
+export async function fetchProfile(): Promise<User> {
+  const res = await http.get<ProfileResponse>('auth/profile')
   return mapApiUser(res.user)
 }

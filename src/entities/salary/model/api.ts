@@ -23,13 +23,12 @@ function buildQuery(params: FetchSalariesParams): string {
 }
 
 export async function fetchSalaries(
-  token: string,
   params: FetchSalariesParams = {},
 ): Promise<SalariesResponse> {
-  return http.get<SalariesResponse>(`salaries${buildQuery(params)}`, token)
+  return http.get<SalariesResponse>(`salaries${buildQuery(params)}`)
 }
 
-export async function fetchSalaryById(id: string, token: string): Promise<Salary> {
-  const res = await http.get<SalaryResponse>(`salaries/${id}`, token)
+export async function fetchSalaryById(id: string): Promise<Salary> {
+  const res = await http.get<SalaryResponse>(`salaries/${id}`)
   return res.salary
 }

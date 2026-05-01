@@ -264,14 +264,13 @@ function Pagination({ page, totalPages, totalRows, onPrev, onNext }: PaginationP
 // ─── Group picker ─────────────────────────────────────────────────────────────
 
 interface GroupPickerProps {
-  token: string
   onSelect: (group: Group) => void
 }
 
-function GroupPicker({ token, onSelect }: GroupPickerProps) {
+function GroupPicker({ onSelect }: GroupPickerProps) {
   const { data: groups, isLoading, isError, refetch } = useQuery({
     queryKey: ['groups'],
-    queryFn:  () => fetchGroups(token),
+    queryFn:  () => fetchGroups(),
   })
 
   return (
@@ -349,7 +348,7 @@ export function AttendancePage() {
 
   const { data: session, isLoading, isError, refetch } = useQuery({
     queryKey,
-    queryFn:  () => fetchAttendanceSession(groupId, selectedDate, token!),
+    queryFn:  () => fetchAttendanceSession(groupId, selectedDate),
     enabled:  !!token && !!groupId,
   })
 
@@ -370,7 +369,7 @@ export function AttendancePage() {
       const entries = (session?.rows ?? [])
         .map((r) => ({ enrollment: r.enrollment, status: draftStatuses[r.enrollment] ?? r.status }))
         .filter((e): e is { enrollment: string; status: AttendanceStatus } => e.status !== null)
-      return submitBulkAttendance({ group: groupId, date: selectedDate, entries }, token!)
+      return submitBulkAttendance({ group: groupId, date: selectedDate, entries })
     },
     onSuccess: () => {
       toast.success("Davomat saqlandi")
@@ -383,7 +382,7 @@ export function AttendancePage() {
 
   // ── Group picker — shown when no groupId resolved ─────────────────────────
   if (!groupId && token) {
-    return <GroupPicker token={token} onSelect={(g) => setSelectedGroup(g)} />
+    return <GroupPicker onSelect={(g) => setSelectedGroup(g)} />
   }
 
   // ── Week navigation ───────────────────────────────────────────────────────

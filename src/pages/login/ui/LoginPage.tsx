@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import { LoginForm } from '@/features/auth/login/ui/LoginForm'
-import { useAuth } from '@/app/providers/AuthProvider'
-import { ROUTES } from '@/shared/config/routes'
+import { useAuth }   from '@/app/providers/AuthProvider'
+import { ROUTES }    from '@/shared/config/routes'
 
 export function LoginPage() {
   const { isAuthenticated } = useAuth()
@@ -23,9 +23,14 @@ export function LoginPage() {
           </div>
         </div>
 
-        {/* Login form */}
+        {/* Card */}
         <div className="border border-gray-200 bg-white px-6 py-7">
-          <h2 className=" font-extrabold text-gray-700 mb-5 text-2xl">Tizimga kirish</h2>
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Xush kelibsiz!</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              O'qituvchi sifatida tizimga kiring
+            </p>
+          </div>
           <LoginForm />
         </div>
 

@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedToken = getStoredToken()
     if (!storedToken) return
 
-    fetchProfile(storedToken)
+    fetchProfile()
       .then((freshUser) => {
         setUser(freshUser)
         setStoredUser(freshUser)
