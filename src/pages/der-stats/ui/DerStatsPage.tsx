@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery }  from '@tanstack/react-query'
-import { Trophy, Users, RefreshCw, Star } from 'lucide-react'
+import { Trophy, RefreshCw, Star } from 'lucide-react'
 import { fetchDerStats } from '@/entities/attendance/model/api'
 import { fetchGroups }   from '@/entities/group/model/api'
 import type { Group }    from '@/entities/group/model/types'
