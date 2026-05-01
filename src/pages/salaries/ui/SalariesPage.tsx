@@ -6,13 +6,7 @@ import type { Salary, SalaryGroup } from '@/entities/salary/model/types'
 import { useAuth }           from '@/app/providers/AuthProvider'
 import { DashboardLayout }   from '@/widgets/dashboard-layout/ui/DashboardLayout'
 import { Header }            from '@/widgets/header/ui/Header'
-import { cn }                from '@/lib/utils'
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function fmt(n: number) {
-  return n.toLocaleString('uz-UZ') + " so'm"
-}
+import { cn, formatMoney }  from '@/lib/utils'
 
 function monthLabel(iso: string) {
   const d = new Date(iso)
@@ -99,12 +93,12 @@ function SalaryDetail({ salary, onClose }: { salary: Salary; onClose: () => void
                       ? `${g.salaryValue}%`
                       : g.salaryType === 'fixed'
                       ? 'Belgilangan'
-                      : `${fmt(g.salaryValue)} / talaba`}
-                    {g.minSalary > 0 && ` · min ${fmt(g.minSalary)}`}
+                      : `${formatMoney(g.salaryValue)} / talaba`}
+                    {g.minSalary > 0 && ` · min ${formatMoney(g.minSalary)}`}
                     {' · '}{g.paidStudentsCount}/{g.studentCount} talaba
                   </p>
                 </div>
-                <p className="text-sm font-semibold text-gray-900 shrink-0">{fmt(g.amount)}</p>
+                <p className="text-sm font-semibold text-gray-900 shrink-0">{formatMoney(g.amount)}</p>
               </div>
             ))}
           </div>
@@ -114,23 +108,23 @@ function SalaryDetail({ salary, onClose }: { salary: Salary; onClose: () => void
         <div className="px-5 py-4 space-y-2">
           <div className="flex justify-between text-sm text-gray-600">
             <span>Jami hisoblangan</span>
-            <span className="font-medium">{fmt(salary.totalAmount)}</span>
+            <span className="font-medium">{formatMoney(salary.totalAmount)}</span>
           </div>
           {salary.bonus > 0 && (
             <div className="flex justify-between text-sm text-green-600">
               <span>Bonus</span>
-              <span className="font-medium">+{fmt(salary.bonus)}</span>
+              <span className="font-medium">+{formatMoney(salary.bonus)}</span>
             </div>
           )}
           {salary.deduction > 0 && (
             <div className="flex justify-between text-sm text-red-500">
               <span>Jarima</span>
-              <span className="font-medium">-{fmt(salary.deduction)}</span>
+              <span className="font-medium">-{formatMoney(salary.deduction)}</span>
             </div>
           )}
           <div className="flex justify-between text-sm font-semibold text-gray-900 pt-2 border-t border-gray-100">
             <span>Sof to'lov</span>
-            <span>{fmt(salary.netAmount)}</span>
+            <span>{formatMoney(salary.netAmount)}</span>
           </div>
           <div className="flex justify-between items-center pt-1">
             <span className="text-xs text-gray-400">Holat</span>
@@ -244,14 +238,14 @@ export function SalariesPage() {
                 <td className="px-4 py-3 font-medium text-gray-800 capitalize">
                   {monthLabel(salary.month)}
                 </td>
-                <td className="px-4 py-3 text-right text-gray-600">{fmt(salary.totalAmount)}</td>
+                <td className="px-4 py-3 text-right text-gray-600">{formatMoney(salary.totalAmount)}</td>
                 <td className="px-4 py-3 text-right text-green-600">
-                  {salary.bonus > 0 ? `+${fmt(salary.bonus)}` : '—'}
+                  {salary.bonus > 0 ? `+${formatMoney(salary.bonus)}` : '—'}
                 </td>
                 <td className="px-4 py-3 text-right text-red-500">
-                  {salary.deduction > 0 ? `-${fmt(salary.deduction)}` : '—'}
+                  {salary.deduction > 0 ? `-${formatMoney(salary.deduction)}` : '—'}
                 </td>
-                <td className="px-4 py-3 text-right font-semibold text-gray-900">{fmt(salary.netAmount)}</td>
+                <td className="px-4 py-3 text-right font-semibold text-gray-900">{formatMoney(salary.netAmount)}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={salary.status} />
                 </td>

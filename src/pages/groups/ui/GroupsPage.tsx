@@ -8,7 +8,7 @@ import { DashboardLayout }  from '@/widgets/dashboard-layout/ui/DashboardLayout'
 import { Header }           from '@/widgets/header/ui/Header'
 import { EmptyState }       from '@/components/ui/empty-state'
 import { CardSkeleton }     from '@/shared/ui/Skeleton'
-import { cn }               from '@/lib/utils'
+import { cn, formatMoney }  from '@/lib/utils'
 
 export function GroupsPage() {
   const navigate  = useNavigate()
@@ -62,7 +62,7 @@ export function GroupsPage() {
                 </div>
                 {group.price != null && (
                   <span className="text-xs border border-gray-200 text-gray-600 px-2 py-0.5 font-medium">
-                    {group.price.toLocaleString()} so'm
+                    {formatMoney(group.price)}
                   </span>
                 )}
               </div>

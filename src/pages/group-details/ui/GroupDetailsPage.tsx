@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { formatPhone } from '@/lib/utils'
 
 // ─── Info stat card ────────────────────────────────────────────────────────────
 
@@ -195,7 +196,7 @@ export function GroupDetailsPage() {
               enrollments.map((enrollment, idx) => {
                 const s = enrollment.student
                 const name = `${s.firstName} ${s.lastName}`
-                const phone = String(s.phone)
+                const phone = formatPhone(s.phone)
 
                 return (
                   <TableRow key={enrollment._id}>

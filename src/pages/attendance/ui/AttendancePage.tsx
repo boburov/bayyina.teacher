@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/table'
 import { getLocalDateString } from '@/shared/lib/dates'
 import { useToast }           from '@/shared/lib/toast'
-import { cn }                 from '@/lib/utils'
+import { cn, formatPhone }    from '@/lib/utils'
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
@@ -489,7 +489,7 @@ export function AttendancePage() {
               pagedRows.map((row, idx) => {
                 const globalIdx   = (page - 1) * PAGE_SIZE + idx + 1
                 const name        = `${row.student.firstName} ${row.student.lastName}`
-                const phone       = String(row.student.phone)
+                const phone       = formatPhone(row.student.phone)
                 const draftStatus = draftStatuses[row.enrollment] ?? row.status
 
                 return (
