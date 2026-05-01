@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Users, CalendarCheck, LogOut, GraduationCap, Menu, X, Bell, Wallet } from 'lucide-react'
+import { Users, CalendarCheck, LogOut, GraduationCap, Menu, X, Bell, Wallet, Trophy } from 'lucide-react'
 import { useState } from 'react'
 import { ROUTES }   from '@/shared/config/routes'
 import { useAuth }  from '@/app/providers/AuthProvider'
@@ -14,6 +14,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Guruhlar',     icon: Users,         path: ROUTES.GROUPS        },
   { label: 'Davomat',      icon: CalendarCheck, path: ROUTES.ATTENDANCE    },
+  { label: 'Reyting',      icon: Trophy,        path: ROUTES.DER_STATS     },
   { label: 'Xabarnomalar', icon: Bell,          path: ROUTES.NOTIFICATIONS },
   { label: 'Maosh',        icon: Wallet,        path: ROUTES.SALARIES      },
 ]

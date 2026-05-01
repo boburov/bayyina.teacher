@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Phone, CalendarCheck, Users, Clock, Loader2 } from 'lucide-react'
 import { fetchGroupById } from '@/entities/group/model/api'
 import { fetchEnrollmentsByGroup } from '@/entities/enrollment/model/api'
+import { fetchAttendanceSummary } from '@/entities/attendance/model/api'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { ROUTES } from '@/shared/config/routes'
 import { DashboardLayout } from '@/widgets/dashboard-layout/ui/DashboardLayout'
@@ -59,6 +60,7 @@ function TableSkeletonRows() {
             </div>
           </TableCell>
           <TableCell className="hidden sm:table-cell"><Skeleton className="w-36 h-4" /></TableCell>
+          <TableCell className="hidden sm:table-cell"><Skeleton className="w-10 h-4 mx-auto" /></TableCell>
           <TableCell className="hidden sm:table-cell"><Skeleton className="w-14 h-5 rounded" /></TableCell>
         </TableRow>
       ))}
@@ -88,6 +90,17 @@ export function GroupDetailsPage() {
     queryFn: () => fetchEnrollmentsByGroup(id!),
     enabled: !!id && !!token,
   })
+
+  const currentMonth = new Date().toISOString().slice(0, 7) // YYYY-MM
+
+  const { data: summary, isLoading: summaryLoading } = useQuery({
+    queryKey: ['attendance-summary', id, currentMonth],
+    queryFn: () => fetchAttendanceSummary(id!, currentMonth),
+    enabled: !!id && !!token,
+  })
+
+  const totalSessions = summary?.totalSessions ?? null
+  const perEnrollment = summary?.perEnrollment ?? {}
 
   const isLoading = groupLoading || enrollmentsLoading
 
@@ -174,6 +187,7 @@ export function GroupDetailsPage() {
               <TableHead className="w-12 pl-6">#</TableHead>
               <TableHead>Ism Familiya</TableHead>
               <TableHead className="hidden sm:table-cell">Telefon</TableHead>
+              <TableHead className="hidden sm:table-cell text-center">Davomat</TableHead>
               <TableHead className="hidden sm:table-cell">Holat</TableHead>
             </TableRow>
           </TableHeader>
@@ -182,21 +196,23 @@ export function GroupDetailsPage() {
               <TableSkeletonRows />
             ) : enrollmentsError ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-sm text-gray-500 py-8">
+                <TableCell colSpan={5} className="text-center text-sm text-gray-500 py-8">
                   O'quvchilar yuklanmadi
                 </TableCell>
               </TableRow>
             ) : enrollments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-sm text-gray-500 py-8">
+                <TableCell colSpan={5} className="text-center text-sm text-gray-500 py-8">
                   Hali o'quvchi yo'q
                 </TableCell>
               </TableRow>
             ) : (
               enrollments.map((enrollment, idx) => {
-                const s = enrollment.student
-                const name = `${s.firstName} ${s.lastName}`
-                const phone = formatPhone(s.phone)
+                const s       = enrollment.student
+                const name    = `${s.firstName} ${s.lastName}`
+                const phone   = formatPhone(s.phone)
+                const attended = perEnrollment[enrollment._id] ?? 0
+                const ratio    = totalSessions ? attended / totalSessions : 0
 
                 return (
                   <TableRow key={enrollment._id}>
@@ -216,6 +232,22 @@ export function GroupDetailsPage() {
                         <Phone size={11} />
                         {phone}
                       </span>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-center">
+                      {summaryLoading ? (
+                        <span className="text-xs text-gray-300">...</span>
+                      ) : totalSessions !== null ? (
+                        <span className={`text-sm font-semibold tabular-nums ${
+                          totalSessions === 0 ? 'text-gray-400' :
+                          ratio >= 0.75       ? 'text-green-600' :
+                          ratio >= 0.5        ? 'text-orange-500' :
+                          'text-red-500'
+                        }`}>
+                          {attended}/{totalSessions}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       <Badge variant={enrollment.status === 'active' ? 'success' : 'outline'}>

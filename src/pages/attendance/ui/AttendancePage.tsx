@@ -154,6 +154,37 @@ function WeekNavigator({
   )
 }
 
+// ─── Star picker ─────────────────────────────────────────────────────────────
+
+function StarPicker({ value, onChange }: { value: number | null; onChange: (v: number) => void }) {
+  return (
+    <div className="flex gap-0.5 mt-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onChange(star) }}
+          className={cn(
+            'text-base leading-none transition-colors select-none',
+            value != null && value >= star ? 'text-amber-400' : 'text-gray-200 hover:text-amber-300',
+          )}
+        >
+          ★
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function StarDisplay({ value }: { value: number | null }) {
+  if (!value) return <span className="text-xs text-gray-300">—</span>
+  return (
+    <span className="text-sm text-amber-400 tracking-tight">
+      {'★'.repeat(value)}{'☆'.repeat(5 - value)}
+    </span>
+  )
+}
+
 // ─── Status display ───────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: AttendanceStatus | null }) {
@@ -214,6 +245,7 @@ function TableSkeletonRows() {
           </TableCell>
           <TableCell className="hidden sm:table-cell"><Skeleton className="w-28 h-4" /></TableCell>
           <TableCell><Skeleton className="w-28 h-7 rounded-md" /></TableCell>
+          <TableCell className="hidden sm:table-cell"><Skeleton className="w-20 h-4" /></TableCell>
           <TableCell className="hidden md:table-cell"><Skeleton className="w-20 h-4" /></TableCell>
         </TableRow>
       ))}
@@ -338,6 +370,7 @@ export function AttendancePage() {
   const [weekStart,    setWeekStart]      = useState(() => getMondayOf(getLocalDateString()))
   const [page,         setPage]           = useState(1)
   const [draftStatuses,  setDraftStatuses]  = useState<Record<string, AttendanceStatus | null>>({})
+  const [draftStars,     setDraftStars]     = useState<Record<string, number | null>>({})
   const [lastSessionKey, setLastSessionKey] = useState('')
 
   const paramGroupId = searchParams.get('groupId') ?? ''
@@ -356,9 +389,14 @@ export function AttendancePage() {
   useEffect(() => {
     const key = `${groupId}_${selectedDate}`
     if (session && lastSessionKey !== key) {
-      const init: Record<string, AttendanceStatus | null> = {}
-      session.rows.forEach((r) => { init[r.enrollment] = r.status })
-      setDraftStatuses(init)
+      const initStatuses: Record<string, AttendanceStatus | null> = {}
+      const initStars:    Record<string, number | null>           = {}
+      session.rows.forEach((r) => {
+        initStatuses[r.enrollment] = r.status
+        initStars[r.enrollment]    = r.rating_stars ?? null
+      })
+      setDraftStatuses(initStatuses)
+      setDraftStars(initStars)
       setLastSessionKey(key)
     }
   }, [session, groupId, selectedDate, lastSessionKey])
@@ -367,8 +405,12 @@ export function AttendancePage() {
   const { mutate: saveBulk, isPending: isSaving } = useMutation({
     mutationFn: () => {
       const entries = (session?.rows ?? [])
-        .map((r) => ({ enrollment: r.enrollment, status: draftStatuses[r.enrollment] ?? r.status }))
-        .filter((e): e is { enrollment: string; status: AttendanceStatus } => e.status !== null)
+        .map((r) => {
+          const status = draftStatuses[r.enrollment] ?? r.status
+          const rating_stars = status === 'present' ? (draftStars[r.enrollment] ?? null) : null
+          return { enrollment: r.enrollment, status, rating_stars }
+        })
+        .filter((e): e is { enrollment: string; status: AttendanceStatus; rating_stars: number | null } => e.status !== null)
       return submitBulkAttendance({ group: groupId, date: selectedDate, entries })
     },
     onSuccess: () => {
@@ -452,6 +494,7 @@ export function AttendancePage() {
               <TableHead>Ism Familiya</TableHead>
               <TableHead className="hidden sm:table-cell">Telefon</TableHead>
               <TableHead>Holat</TableHead>
+              <TableHead className="hidden sm:table-cell">Faollik</TableHead>
               <TableHead className="hidden md:table-cell">Izoh</TableHead>
             </TableRow>
           </TableHeader>
@@ -461,7 +504,7 @@ export function AttendancePage() {
               <TableSkeletonRows />
             ) : isError ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-12">
+                <TableCell colSpan={6} className="py-12">
                   <div className="flex flex-col items-center gap-3 text-gray-500">
                     <p className="text-sm font-medium">Davomat ma'lumotlari yuklanmadi</p>
                     <Button
@@ -478,7 +521,7 @@ export function AttendancePage() {
               </TableRow>
             ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-12">
+                <TableCell colSpan={6} className="py-12">
                   <div className="flex flex-col items-center gap-2 text-gray-400">
                     <Users size={20} />
                     <p className="text-sm">Ushbu guruhda o'quvchilar yo'q</p>
@@ -491,6 +534,7 @@ export function AttendancePage() {
                 const name        = `${row.student.firstName} ${row.student.lastName}`
                 const phone       = formatPhone(row.student.phone)
                 const draftStatus = draftStatuses[row.enrollment] ?? row.status
+                const draftStar   = draftStars[row.enrollment] ?? row.rating_stars
 
                 return (
                   <TableRow key={row.enrollment}>
@@ -521,6 +565,21 @@ export function AttendancePage() {
                         />
                       ) : (
                         <StatusBadge status={draftStatus} />
+                      )}
+                    </TableCell>
+
+                    <TableCell className="hidden sm:table-cell">
+                      {draftStatus === 'present' ? (
+                        isEditable ? (
+                          <StarPicker
+                            value={draftStar}
+                            onChange={(v) => setDraftStars((prev) => ({ ...prev, [row.enrollment]: v }))}
+                          />
+                        ) : (
+                          <StarDisplay value={draftStar} />
+                        )
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
                       )}
                     </TableCell>
 

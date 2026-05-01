@@ -5,6 +5,7 @@ export const ROUTES = {
   ATTENDANCE:    '/attendance',
   NOTIFICATIONS: '/notifications',
   SALARIES:      '/salaries',
+  DER_STATS:     '/der-stats',
 } as const
 
 export function groupDetailsPath(id: string | number) {

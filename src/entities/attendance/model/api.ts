@@ -31,3 +31,29 @@ export async function submitBulkAttendance(
 ): Promise<unknown> {
   return http.post<unknown>('attendance/bulk', payload)
 }
+
+export interface AttendanceSummary {
+  totalSessions: number
+  perEnrollment: Record<string, number>
+}
+
+export async function fetchAttendanceSummary(
+  groupId: string,
+  month: string, // YYYY-MM
+): Promise<AttendanceSummary> {
+  return http.get<AttendanceSummary>(
+    `attendance/summary?group=${groupId}&month=${month}`,
+  )
+}
+
+export async function fetchDerStats(params: {
+  group?: string
+  from?: string
+  to?: string
+}): Promise<import('./types').DerStatsResponse> {
+  const q = new URLSearchParams()
+  if (params.group) q.set('group', params.group)
+  if (params.from)  q.set('from', params.from)
+  if (params.to)    q.set('to',   params.to)
+  return http.get(`attendance/der/stats?${q.toString()}`)
+}
