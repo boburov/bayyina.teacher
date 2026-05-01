@@ -96,11 +96,12 @@ function SalaryDetail({ salary, onClose }: { salary: Salary; onClose: () => void
                   <p className="text-sm font-medium text-gray-800">{g.groupName}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
                     {g.salaryType === 'percentage'
-                      ? `${g.salaryValue}% · `
+                      ? `${g.salaryValue}%`
                       : g.salaryType === 'fixed'
-                      ? `Belgilangan · `
-                      : `${fmt(g.salaryValue)} / talaba · `}
-                    {g.paidStudentsCount}/{g.studentCount} talaba
+                      ? 'Belgilangan'
+                      : `${fmt(g.salaryValue)} / talaba`}
+                    {g.minSalary > 0 && ` · min ${fmt(g.minSalary)}`}
+                    {' · '}{g.paidStudentsCount}/{g.studentCount} talaba
                   </p>
                 </div>
                 <p className="text-sm font-semibold text-gray-900 shrink-0">{fmt(g.amount)}</p>

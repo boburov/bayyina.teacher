@@ -29,14 +29,11 @@ export function useAttendanceForm(groupId: string, students: Student[]) {
 
   const mutation = useMutation({
     mutationFn: () =>
-      submitBulkAttendance(
-        {
-          group:   groupId,
-          date:    today,
-          entries: students.map((s) => ({ enrollment: s.id, status: statuses[s.id] })),
-        },
-        '',
-      ),
+      submitBulkAttendance({
+        group:   groupId,
+        date:    today,
+        entries: students.map((s) => ({ enrollment: s.id, status: statuses[s.id] })),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['attendance', groupId] })
       setSubmitted(true)

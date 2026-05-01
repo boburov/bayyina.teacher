@@ -17,19 +17,19 @@ export interface GroupTeacher {
 }
 
 export interface Group {
-  id:          string
-  name:        string
-  description: string
-  price:       number
-  teacher:     GroupTeacher
-  schedule:    GroupSchedule
-  room:        string
-  createdBy:   string
-  createdAt:   string
-  updatedAt:   string
-  // kept for attendance page compatibility
-  studentCount: number
-  students:     Student[]
+  id:                   string
+  name:                 string
+  description:          string
+  price?:               number
+  teacher:              GroupTeacher
+  schedule:             GroupSchedule
+  room:                 string
+  createdBy:            string
+  createdAt:            string
+  updatedAt:            string
+  showPaymentsToTeacher: boolean
+  studentCount:         number
+  students:             Student[]
 }
 
 export interface GroupDetailResponse {
@@ -49,14 +49,15 @@ export interface GroupsResponse {
 }
 
 export interface ApiGroup {
-  _id:         string
-  name:        string
-  description: string
-  price:       number
-  teacher:     GroupTeacher
-  schedule:    GroupSchedule
-  room:        string
-  createdBy:   string
-  createdAt:   string
-  updatedAt:   string
+  _id:                  string
+  name:                 string
+  description:          string
+  price?:               number
+  teacher:              GroupTeacher
+  schedule:             GroupSchedule
+  room:                 string
+  createdBy:            string
+  createdAt:            string
+  updatedAt:            string
+  showPaymentsToTeacher: boolean
 }

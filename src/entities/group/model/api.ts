@@ -3,18 +3,19 @@ import type { Group, GroupsResponse, GroupDetailResponse, ApiGroup } from './typ
 
 function mapApiGroup(g: ApiGroup): Group {
   return {
-    id:           g._id,
-    name:         g.name,
-    description:  g.description,
-    price:        g.price,
-    teacher:      g.teacher,
-    schedule:     g.schedule,
-    room:         g.room,
-    createdBy:    g.createdBy,
-    createdAt:    g.createdAt,
-    updatedAt:    g.updatedAt,
-    studentCount: 0,
-    students:     [],
+    id:                   g._id,
+    name:                 g.name,
+    description:          g.description,
+    ...(g.price != null && { price: g.price }),
+    teacher:              g.teacher,
+    schedule:             g.schedule,
+    room:                 g.room,
+    createdBy:            g.createdBy,
+    createdAt:            g.createdAt,
+    updatedAt:            g.updatedAt,
+    showPaymentsToTeacher: g.showPaymentsToTeacher ?? false,
+    studentCount:         0,
+    students:             [],
   }
 }
 

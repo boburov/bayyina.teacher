@@ -60,9 +60,11 @@ export function GroupsPage() {
                 <div className="flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-500 shrink-0">
                   <BookOpen size={15} />
                 </div>
-                <span className="text-xs border border-gray-200 text-gray-600 px-2 py-0.5 font-medium">
-                  {group.price.toLocaleString()} so'm
-                </span>
+                {group.price != null && (
+                  <span className="text-xs border border-gray-200 text-gray-600 px-2 py-0.5 font-medium">
+                    {group.price.toLocaleString()} so'm
+                  </span>
+                )}
               </div>
 
               <h3 className="text-sm font-semibold text-gray-900 mb-1 leading-snug">

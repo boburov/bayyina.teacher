@@ -15,7 +15,7 @@ export function useAttendanceTable(groupId: string, date: string) {
   // ── server state ──────────────────────────────────────────────────────────
   const { data: session, isLoading, isError } = useQuery({
     queryKey: ['attendance-session', groupId, date],
-    queryFn:  () => fetchAttendanceSession(groupId, date, token!),
+    queryFn:  () => fetchAttendanceSession(groupId, date),
     enabled:  !!token && !!groupId && !!date,
   })
 
@@ -67,7 +67,7 @@ export function useAttendanceTable(groupId: string, date: string) {
         status:     statuses[r.enrollment] ?? 'present',
         ...(notes[r.enrollment] ? { note: notes[r.enrollment] } : {}),
       }))
-      return submitBulkAttendance({ group: groupId, date, entries }, token!)
+      return submitBulkAttendance({ group: groupId, date, entries })
     },
     onSuccess: () => {
       toast.success('Davomat muvaffaqiyatli saqlandi!')

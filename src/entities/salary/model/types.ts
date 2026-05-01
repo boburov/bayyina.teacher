@@ -1,8 +1,9 @@
 export interface SalaryGroup {
   group:             string
   groupName:         string
-  salaryType:        'percentage' | 'per_student' | string
+  salaryType:        'percentage' | 'per_student' | 'fixed' | string
   salaryValue:       number
+  minSalary:         number
   studentCount:      number
   paidStudentsCount: number
   groupRevenue:      number

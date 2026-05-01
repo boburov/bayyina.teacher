@@ -314,7 +314,6 @@ export function NotificationsPage() {
         <div className="lg:hidden fixed inset-0 z-50 bg-white flex flex-col">
           <DetailPanel
             notification={selected}
-            token={token!}
             onClose={() => setSelected(null)}
           />
         </div>
