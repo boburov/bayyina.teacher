@@ -13,7 +13,7 @@ export interface AttendanceSessionRow {
   enrollment:   string
   student:      AttendanceSessionStudent
   status:       AttendanceStatus | null
-  rating_stars: number | null
+  grade:        number | null
   note:         string | null
   attendanceId: string | null
   markedAt:     string | null
@@ -44,10 +44,10 @@ export interface MarkAttendancePayload {
 // ─── Bulk submit API (kept for compatibility) ─────────────────────────────────
 
 export interface AttendanceBulkEntry {
-  enrollment:    string
-  status:        AttendanceStatus
-  rating_stars?: number | null
-  note?:         string
+  enrollment: string
+  status:     AttendanceStatus
+  grade?:     number | null
+  note?:      string
 }
 
 // ─── DER Stats ────────────────────────────────────────────────────────────────
@@ -58,18 +58,15 @@ export interface DerStudentStat {
   totalPresent:  number
   totalAbsent:   number
   totalSessions: number
-  totalStars:    number
-  avgStars:      number | null
-  score:         number
+  avgGrade:      number | null
   rankGlobal:    number
   rankInGroup:   number
 }
 
 export interface DerStatsResponse {
-  stats:  DerStudentStat[]
-  from:   string
-  to:     string
-  config: { attendedDayPoints: number; starMultiplier: number }
+  stats: DerStudentStat[]
+  from:  string
+  to:    string
 }
 
 export interface AttendanceBulkPayload {

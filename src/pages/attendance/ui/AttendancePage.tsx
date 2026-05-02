@@ -154,33 +154,41 @@ function WeekNavigator({
   )
 }
 
-// ─── Star picker ─────────────────────────────────────────────────────────────
+// ─── Grade picker ─────────────────────────────────────────────────────────────
 
-function StarPicker({ value, onChange }: { value: number | null; onChange: (v: number) => void }) {
+function GradePicker({ value, onChange }: { value: number | null; onChange: (v: number) => void }) {
   return (
-    <div className="flex gap-0.5 mt-1">
-      {[1, 2, 3, 4, 5].map((star) => (
+    <div className="flex gap-1 mt-1">
+      {[2, 3, 4, 5].map((grade) => (
         <button
-          key={star}
+          key={grade}
           type="button"
-          onClick={(e) => { e.stopPropagation(); onChange(star) }}
+          onClick={(e) => { e.stopPropagation(); onChange(grade) }}
           className={cn(
-            'text-base leading-none transition-colors select-none',
-            value != null && value >= star ? 'text-amber-400' : 'text-gray-200 hover:text-amber-300',
+            'w-7 h-7 text-xs font-bold rounded border transition-colors',
+            value === grade
+              ? 'bg-brown-800 text-white border-brown-800'
+              : 'text-gray-500 border-gray-200 hover:border-brown-800 hover:text-brown-800',
           )}
         >
-          ★
+          {grade}
         </button>
       ))}
     </div>
   )
 }
 
-function StarDisplay({ value }: { value: number | null }) {
+function GradeDisplay({ value }: { value: number | null }) {
   if (!value) return <span className="text-xs text-gray-300">—</span>
   return (
-    <span className="text-sm text-amber-400 tracking-tight">
-      {'★'.repeat(value)}{'☆'.repeat(5 - value)}
+    <span className={cn(
+      'text-sm font-bold',
+      value === 5 ? 'text-emerald-600' :
+      value === 4 ? 'text-blue-600' :
+      value === 3 ? 'text-amber-600' :
+      'text-rose-600',
+    )}>
+      {value}
     </span>
   )
 }
@@ -370,7 +378,7 @@ export function AttendancePage() {
   const [weekStart,    setWeekStart]      = useState(() => getMondayOf(getLocalDateString()))
   const [page,         setPage]           = useState(1)
   const [draftStatuses,  setDraftStatuses]  = useState<Record<string, AttendanceStatus | null>>({})
-  const [draftStars,     setDraftStars]     = useState<Record<string, number | null>>({})
+  const [draftGrades,    setDraftGrades]    = useState<Record<string, number | null>>({})
   const [lastSessionKey, setLastSessionKey] = useState('')
 
   const paramGroupId = searchParams.get('groupId') ?? ''
@@ -390,13 +398,13 @@ export function AttendancePage() {
     const key = `${groupId}_${selectedDate}`
     if (session && lastSessionKey !== key) {
       const initStatuses: Record<string, AttendanceStatus | null> = {}
-      const initStars:    Record<string, number | null>           = {}
+      const initGrades:   Record<string, number | null>           = {}
       session.rows.forEach((r) => {
         initStatuses[r.enrollment] = r.status
-        initStars[r.enrollment]    = r.rating_stars ?? null
+        initGrades[r.enrollment]   = r.grade ?? null
       })
       setDraftStatuses(initStatuses)
-      setDraftStars(initStars)
+      setDraftGrades(initGrades)
       setLastSessionKey(key)
     }
   }, [session, groupId, selectedDate, lastSessionKey])
@@ -407,10 +415,10 @@ export function AttendancePage() {
       const entries = (session?.rows ?? [])
         .map((r) => {
           const status = draftStatuses[r.enrollment] ?? r.status
-          const rating_stars = status === 'present' ? (draftStars[r.enrollment] ?? null) : null
-          return { enrollment: r.enrollment, status, rating_stars }
+          const grade  = status === 'present' ? (draftGrades[r.enrollment] ?? null) : null
+          return { enrollment: r.enrollment, status, grade }
         })
-        .filter((e): e is { enrollment: string; status: AttendanceStatus; rating_stars: number | null } => e.status !== null)
+        .filter((e): e is { enrollment: string; status: AttendanceStatus; grade: number | null } => e.status !== null)
       return submitBulkAttendance({ group: groupId, date: selectedDate, entries })
     },
     onSuccess: () => {
@@ -494,7 +502,7 @@ export function AttendancePage() {
               <TableHead>Ism Familiya</TableHead>
               <TableHead className="hidden sm:table-cell">Telefon</TableHead>
               <TableHead>Holat</TableHead>
-              <TableHead className="hidden sm:table-cell">Faollik</TableHead>
+              <TableHead className="hidden sm:table-cell">Baho</TableHead>
               <TableHead className="hidden md:table-cell">Izoh</TableHead>
             </TableRow>
           </TableHeader>
@@ -534,7 +542,7 @@ export function AttendancePage() {
                 const name        = `${row.student.firstName} ${row.student.lastName}`
                 const phone       = formatPhone(row.student.phone)
                 const draftStatus = draftStatuses[row.enrollment] ?? row.status
-                const draftStar   = draftStars[row.enrollment] ?? row.rating_stars
+                const draftGrade  = draftGrades[row.enrollment] ?? row.grade
 
                 return (
                   <TableRow key={row.enrollment}>
@@ -571,12 +579,12 @@ export function AttendancePage() {
                     <TableCell className="hidden sm:table-cell">
                       {draftStatus === 'present' ? (
                         isEditable ? (
-                          <StarPicker
-                            value={draftStar}
-                            onChange={(v) => setDraftStars((prev) => ({ ...prev, [row.enrollment]: v }))}
+                          <GradePicker
+                            value={draftGrade}
+                            onChange={(v) => setDraftGrades((prev) => ({ ...prev, [row.enrollment]: v }))}
                           />
                         ) : (
-                          <StarDisplay value={draftStar} />
+                          <GradeDisplay value={draftGrade} />
                         )
                       ) : (
                         <span className="text-xs text-gray-300">—</span>

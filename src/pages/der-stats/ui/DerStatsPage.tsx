@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery }  from '@tanstack/react-query'
-import { Trophy, RefreshCw, Star } from 'lucide-react'
+import { Trophy, RefreshCw } from 'lucide-react'
 import { fetchDerStats } from '@/entities/attendance/model/api'
 import { fetchGroups }   from '@/entities/group/model/api'
 import type { Group }    from '@/entities/group/model/types'
@@ -33,30 +33,17 @@ function RankBadge({ rank }: { rank: number }) {
   return <span className="text-gray-500 text-sm font-mono">{rank}</span>
 }
 
-function StarsDisplay({ avg }: { avg: number | null }) {
+function GradeDisplay({ avg }: { avg: number | null }) {
   if (avg == null) return <span className="text-gray-300 text-xs">—</span>
-  const full  = Math.floor(avg)
-  const frac  = avg - full
+  const color =
+    avg >= 4.5 ? 'text-emerald-600' :
+    avg >= 3.5 ? 'text-blue-600' :
+    avg >= 2.5 ? 'text-amber-600' :
+    'text-rose-600'
   return (
-    <span className="text-amber-400 text-sm font-medium">
-      {'★'.repeat(full)}{frac >= 0.5 ? '½' : ''}
-      <span className="text-gray-400 text-xs ml-1">{avg.toFixed(1)}</span>
+    <span className={cn('text-sm font-bold', color)}>
+      {avg.toFixed(1)}
     </span>
-  )
-}
-
-function ScoreBar({ score, max }: { score: number; max: number }) {
-  const pct = max > 0 ? Math.round((score / max) * 100) : 0
-  return (
-    <div className="flex items-center gap-2 min-w-[100px]">
-      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-amber-400 rounded-full transition-all"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <span className="text-xs font-mono text-gray-600 w-8 text-right">{score}</span>
-    </div>
   )
 }
 
@@ -82,11 +69,10 @@ export function DerStatsPage() {
   })
 
   const stats = data?.stats ?? []
-  const maxScore = stats.length > 0 ? stats[0].score : 0
 
   return (
     <DashboardLayout>
-      <Header title="Faollik Reytingi" subtitle="Kundalik davomat va yulduz statistikasi" />
+      <Header title="Baho Reytingi" subtitle="Kundalik davomat va baho statistikasi" />
 
       {/* Filters */}
       <Card className="p-4 flex flex-wrap items-end gap-3 mb-4">
@@ -144,10 +130,7 @@ export function DerStatsPage() {
               <TableHead>O'quvchi</TableHead>
               <TableHead className="hidden sm:table-cell">Guruh</TableHead>
               <TableHead>Davomat</TableHead>
-              <TableHead className="hidden sm:table-cell">
-                <span className="flex items-center gap-1"><Star size={12} className="text-amber-400" />O'rtacha</span>
-              </TableHead>
-              <TableHead>Ball</TableHead>
+              <TableHead>O'rtacha baho</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -159,8 +142,7 @@ export function DerStatsPage() {
                   <TableCell><Skeleton className="w-32 h-4" /></TableCell>
                   <TableCell className="hidden sm:table-cell"><Skeleton className="w-24 h-4" /></TableCell>
                   <TableCell><Skeleton className="w-20 h-4" /></TableCell>
-                  <TableCell className="hidden sm:table-cell"><Skeleton className="w-20 h-4" /></TableCell>
-                  <TableCell><Skeleton className="w-24 h-4" /></TableCell>
+                  <TableCell><Skeleton className="w-16 h-4" /></TableCell>
                 </TableRow>
               ))
             ) : isError ? (
@@ -177,7 +159,7 @@ export function DerStatsPage() {
               </TableRow>
             ) : stats.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-12">
+                <TableCell colSpan={5} className="py-12">
                   <div className="flex flex-col items-center gap-2 text-gray-400">
                     <Trophy size={24} />
                     <p className="text-sm">Bu davr uchun ma'lumot yo'q</p>
@@ -232,12 +214,8 @@ export function DerStatsPage() {
                       </div>
                     </TableCell>
 
-                    <TableCell className="hidden sm:table-cell">
-                      <StarsDisplay avg={s.avgStars} />
-                    </TableCell>
-
                     <TableCell>
-                      <ScoreBar score={s.score} max={maxScore} />
+                      <GradeDisplay avg={s.avgGrade} />
                     </TableCell>
                   </TableRow>
                 )
@@ -245,12 +223,6 @@ export function DerStatsPage() {
             )}
           </TableBody>
         </Table>
-
-        {!isLoading && !isError && stats.length > 0 && data?.config && (
-          <div className="px-6 py-3 border-t border-gray-100 bg-gray-50 text-xs text-gray-400">
-            Ball formulasi: qatnashgan kun × {data.config.attendedDayPoints} + yulduz × {data.config.starMultiplier}
-          </div>
-        )}
       </Card>
     </DashboardLayout>
   )
