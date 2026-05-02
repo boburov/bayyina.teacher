@@ -142,9 +142,9 @@ export function GroupDetailsPage() {
         subtitle={`${studentCount} o'quvchi`}
         backPath={ROUTES.GROUPS}
         action={
-          <Button onClick={goToAttendance} size="default" className="gap-2">
+          <Button onClick={goToAttendance} size="default" className="gap-2 px-3 sm:px-4">
             <CalendarCheck size={14} />
-            Davomatga o'tish
+            <span className="hidden sm:inline">Davomatga o'tish</span>
           </Button>
         }
       />

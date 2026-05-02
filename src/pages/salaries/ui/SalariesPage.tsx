@@ -28,8 +28,8 @@ function RowSkeleton() {
     <tr className="animate-pulse border-t border-gray-100">
       <td className="px-4 py-3"><div className="h-4 w-28 bg-gray-100 rounded-sm" /></td>
       <td className="px-4 py-3"><div className="h-4 w-20 bg-gray-100 rounded-sm" /></td>
-      <td className="px-4 py-3"><div className="h-4 w-16 bg-gray-100 rounded-sm" /></td>
-      <td className="px-4 py-3"><div className="h-4 w-16 bg-gray-100 rounded-sm" /></td>
+      <td className="px-4 py-3 hidden sm:table-cell"><div className="h-4 w-16 bg-gray-100 rounded-sm" /></td>
+      <td className="px-4 py-3 hidden sm:table-cell"><div className="h-4 w-16 bg-gray-100 rounded-sm" /></td>
       <td className="px-4 py-3"><div className="h-4 w-24 bg-gray-100 rounded-sm" /></td>
       <td className="px-4 py-3"><div className="h-5 w-14 bg-gray-100 rounded-sm" /></td>
     </tr>
@@ -199,8 +199,8 @@ export function SalariesPage() {
             <tr className="border-b border-gray-200 bg-gray-50">
               <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Oy</th>
               <th className="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Hisoblangan</th>
-              <th className="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Bonus</th>
-              <th className="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Jarima</th>
+              <th className="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Bonus</th>
+              <th className="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Jarima</th>
               <th className="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Sof to'lov</th>
               <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Holat</th>
             </tr>
@@ -239,10 +239,10 @@ export function SalariesPage() {
                   {monthLabel(salary.month)}
                 </td>
                 <td className="px-4 py-3 text-right text-gray-600">{formatMoney(salary.totalAmount)}</td>
-                <td className="px-4 py-3 text-right text-green-600">
+                <td className="px-4 py-3 text-right text-green-600 hidden sm:table-cell">
                   {salary.bonus > 0 ? `+${formatMoney(salary.bonus)}` : '—'}
                 </td>
-                <td className="px-4 py-3 text-right text-red-500">
+                <td className="px-4 py-3 text-right text-red-500 hidden sm:table-cell">
                   {salary.deduction > 0 ? `-${formatMoney(salary.deduction)}` : '—'}
                 </td>
                 <td className="px-4 py-3 text-right font-semibold text-gray-900">{formatMoney(salary.netAmount)}</td>

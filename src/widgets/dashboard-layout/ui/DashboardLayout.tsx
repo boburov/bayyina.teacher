@@ -19,7 +19,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="flex h-screen overflow-hidden bg-white">
       <Sidebar />
       <main className="flex-1 overflow-y-auto bg-gray-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 pl-16 lg:pl-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 pl-12 sm:pl-14 lg:pl-6">
           {children}
         </div>
       </main>

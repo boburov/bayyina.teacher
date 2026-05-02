@@ -17,8 +17,8 @@ export function Header({ title, subtitle, backPath, onBack, action }: HeaderProp
 
   return (
     <div className="mb-6 pb-4 border-b border-gray-200">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
           {handleBack && (
             <button
               onClick={handleBack}
@@ -28,14 +28,14 @@ export function Header({ title, subtitle, backPath, onBack, action }: HeaderProp
               <ChevronLeft size={14} />
             </button>
           )}
-          <div>
-            <h1 className="text-base font-semibold text-gray-900 leading-tight">{title}</h1>
+          <div className="min-w-0">
+            <h1 className="text-base font-semibold text-gray-900 leading-tight truncate">{title}</h1>
             {subtitle && (
-              <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+              <p className="text-xs text-gray-400 mt-0.5 truncate">{subtitle}</p>
             )}
           </div>
         </div>
-        {action && <div className="shrink-0">{action}</div>}
+        {action && <div className="shrink-0 ml-2">{action}</div>}
       </div>
     </div>
   )
