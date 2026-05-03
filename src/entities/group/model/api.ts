@@ -32,6 +32,13 @@ export async function fetchGroups(): Promise<Group[]> {
   return list.map(mapApiGroup)
 }
 
+export async function sendGroupMessage(
+  id: string,
+  message: string,
+): Promise<{ sent: number; failed: number; total: number }> {
+  return http.post(`groups/${id}/send-message`, { message })
+}
+
 export async function fetchGroupById(id: string): Promise<Group | null> {
   const res = await http.get<GroupDetailResponse | ApiGroup>(`groups/${id}`)
 

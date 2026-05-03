@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Users, CalendarCheck, LogOut, GraduationCap, Menu, X, Bell, Wallet, Trophy } from 'lucide-react'
+import { Users, CalendarCheck, LogOut, Menu, X, Bell, Wallet, Trophy, Send } from 'lucide-react'
 import { useState } from 'react'
 import { ROUTES }   from '@/shared/config/routes'
 import { useAuth }  from '@/app/providers/AuthProvider'
 import { cn }       from '@/lib/utils'
+import logo         from '@/shared/assets/logo.svg'
 
 interface NavItem {
   label: string
@@ -17,6 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Reyting',      icon: Trophy,        path: ROUTES.DER_STATS     },
   { label: 'Xabarnomalar', icon: Bell,          path: ROUTES.NOTIFICATIONS },
   { label: 'Maosh',        icon: Wallet,        path: ROUTES.SALARIES      },
+  { label: 'Xabar yuborish', icon: Send,        path: ROUTES.SEND_MESSAGE  },
 ]
 
 function getUserInitials(user: { firstName?: string; lastName?: string; name?: string } | null): string {
@@ -40,9 +42,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     <aside className="flex flex-col w-56 h-full bg-white border-r border-gray-200">
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-4 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-center w-7 h-7 bg-brown-800 shrink-0">
-          <GraduationCap size={14} className="text-white" />
-        </div>
+        <img src={logo} alt="Bayyina logo" className="w-8 h-8 shrink-0 object-contain" />
         <div>
           <p className="text-sm font-semibold text-gray-900 leading-tight">Bayyina</p>
           <p className="text-xs text-gray-400">O'qituvchi paneli</p>
