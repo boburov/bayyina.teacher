@@ -13,7 +13,7 @@ export function SendMessagePage() {
   const toast = useToast()
   const [selected, setSelected]   = useState<Group | null>(null)
   const [message,  setMessage]    = useState('')
-  const [lastResult, setLastResult] = useState<{ sent: number; failed: number } | null>(null)
+  const [lastResult, setLastResult] = useState<{ sent: number; failed: number; total: number } | null>(null)
 
   const { data: groups = [], isLoading } = useQuery({
     queryKey: ['groups'],
@@ -124,14 +124,16 @@ export function SendMessagePage() {
               </div>
 
               {lastResult && (
-                <div className="mt-4 flex items-start gap-2 p-3 bg-green-50 border border-green-200 text-sm text-green-800">
-                  <CheckCircle2 size={15} className="mt-0.5 shrink-0" />
-                  <span>
-                    <b>{lastResult.sent}</b> ta xabar muvaffaqiyatli yuborildi
-                    {lastResult.failed > 0 && (
-                      <span className="text-red-600 ml-1">({lastResult.failed} ta xato)</span>
-                    )}
-                  </span>
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 text-sm text-green-800 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 size={15} className="shrink-0" />
+                    <span>
+                      <b>{lastResult.sent}</b> / <b>{lastResult.total}</b> ta o'quvchiga xabar yetkazildi
+                    </span>
+                  </div>
+                  {lastResult.failed > 0 && (
+                    <p className="text-red-600 pl-5">{lastResult.failed} ta xato</p>
+                  )}
                 </div>
               )}
             </>
