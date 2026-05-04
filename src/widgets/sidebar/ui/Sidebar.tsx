@@ -92,7 +92,9 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
               {user ? `${user.firstName} ${user.lastName}` : '—'}
             </p>
             {user?.role && (
-              <p className="text-xs text-gray-400 truncate capitalize">{user.role}</p>
+              <p className="text-xs text-gray-400 truncate">
+                {user.role === 'teacher' ? "O'qituvchi" : user.role === 'admin' ? 'Admin' : user.role === 'student' ? "O'quvchi" : user.role}
+              </p>
             )}
           </div>
         </div>
